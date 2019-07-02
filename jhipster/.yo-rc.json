@@ -1,0 +1,40 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.jiwhiz.demo",
+      "nativeLanguage": "en"
+    },
+    "jhipsterVersion": "6.1.2",
+    "applicationType": "monolith",
+    "baseName": "jhipster",
+    "packageName": "com.jiwhiz.demo",
+    "packageFolder": "com/jiwhiz/demo",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": true,
+    "websocket": "spring-websocket",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "MDA4NTgxYTU2Y2Y5YjhjN2JmY2Q4NzNhOTBjZmE5YzAxMjliZjFhNjViYmY3YWNiOWNkM2VlNDQyMTYzZmIyZTdhM2Q3NGMwZTExOGQxMGU4MjgyMWZjZDkxNjc1MWY2OWMxNjJkZjIzMzdiMzdjMzQ4NGZhYzgyYzhmNDkyNzk=",
+    "useSass": true,
+    "clientPackageManager": "npm",
+    "clientFramework": "react",
+    "clientTheme": "none",
+    "clientThemeVariant": "",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": true,
+    "nativeLanguage": "en",
+    "languages": ["en", "zh-cn", "fr"]
+  }
+}
