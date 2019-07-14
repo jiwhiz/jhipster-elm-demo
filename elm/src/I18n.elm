@@ -1,4 +1,4 @@
-module I18n exposing (Language(..), Translator, languageFromCode, languageName)
+module I18n exposing (Language(..), Translator, languageCode, languageFromCode, languageName, supportLanguages)
 
 
 type Language
@@ -9,6 +9,13 @@ type Language
 
 type alias Translator phase =
     phase -> String
+
+
+supportLanguages =
+    [ English
+    , French
+    , ChineseSimplified
+    ]
 
 
 languageFromCode : String -> Language
@@ -32,6 +39,19 @@ languageName lang =
     case lang of
         ChineseSimplified ->
             "中文（简体）"
+
+        English ->
+            "English"
+
+        French ->
+            "Français"
+
+
+languageCode : Language -> String
+languageCode lang =
+    case lang of
+        ChineseSimplified ->
+            "zh-cn"
 
         English ->
             "English"

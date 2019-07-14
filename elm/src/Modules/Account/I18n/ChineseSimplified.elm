@@ -38,6 +38,9 @@ translate phrase =
         RegistrationFailed ->
             "注册失败!"
 
+        RegistrationSuccess ->
+            "注册成功! 请检查您的邮箱."
+
         SettingsTitle username ->
             "[" ++ username ++ "]的用户设置"
 

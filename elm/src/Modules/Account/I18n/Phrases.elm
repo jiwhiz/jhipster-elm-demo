@@ -17,6 +17,7 @@ type Phrase
     | RegisterButtonLabel
     | RegisterButtonLoading
     | RegistrationFailed
+    | RegistrationSuccess
     -- Settings page
     | SettingsTitle String
     | SaveButtonLabel

@@ -12,6 +12,7 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
+import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing(translator)
@@ -34,19 +35,20 @@ type alias Values =
     , email : String
     , password : String
     , repeatPassword : String
+    , languageKey : String
     }
 
 
 type Msg 
     = NavigateTo Route
     | FormChanged Model
-    | Register String String String
+    | Register String String String String
     | RegisterResponse (WebData ())
 
 
 init : ( Model, Cmd Msg )
 init = 
-    ( Values "" "" "" "" |> Form.View.idle
+    ( Values "" "" "" "" "en" |> Form.View.idle
     , Cmd.none
     )
 
@@ -64,12 +66,13 @@ update sharedState msg model =
         FormChanged newModel ->
             ( newModel, Cmd.none, NoUpdate )
 
-        Register username email password ->
+        Register username email password languageKey ->
             let
                 registerVM =
                     { username = Just username
                     , email = Just email
                     , password = Just password
+                    , languageKey = Just languageKey
                     }
             in
             case model.state of
@@ -100,7 +103,11 @@ update sharedState msg model =
         RegisterResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , NoUpdate
+            , ShowToast <|
+                Toasty.Defaults.Success
+                    (translate AccountPhrases.Success)
+                    (translate AccountPhrases.RegistrationSuccess)
+
             )
 
         RegisterResponse _ ->
@@ -202,6 +209,21 @@ form sharedState =
                             }
                         }
                 )
+
+        languageField =
+            Form.selectField
+                { parser = Ok
+                , value = .languageKey
+                , update = \value values -> { values | languageKey = value }
+                , attributes =
+                    { label = translate AccountPhrases.LanguageLabel
+                    , placeholder = " - select language -"
+                    , options = 
+                        List.map
+                            (\lang -> (I18n.languageCode lang, I18n.languageName lang))
+                            I18n.supportLanguages
+                    }
+                }
     in
     Form.succeed Register
         |> Form.append usernameField
@@ -211,5 +233,6 @@ form sharedState =
                 |> Form.append passwordField
                 |> Form.append repeatPasswordField
             )
+        |> Form.append languageField
 
 

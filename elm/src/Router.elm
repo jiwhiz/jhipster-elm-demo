@@ -47,7 +47,6 @@ type alias Model =
     , toggleMenuState : Bool
     , dropdownMenuState : DropdownMenuState
     , loginDialogState : Bool
-    , plain_password : String -- Only used for the modal refresh login dialog
     , toasties : Toasty.Stack Toasty.Defaults.Toast
     }
 
@@ -105,7 +104,6 @@ init url =
       , toggleMenuState = False
       , dropdownMenuState = AllClosed
       , loginDialogState = False
-      , plain_password = ""
       , toasties = Toasty.initialState
       }
     , (Task.perform identity << Task.succeed) <| UrlChanged url

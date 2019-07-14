@@ -11,6 +11,7 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
+import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing(translator)
@@ -32,20 +33,20 @@ type alias Values =
     { firstName : String
     , lastName : String
     , email : String
-    -- , language : String  TODO: add language after i18n
+    , languageKey : String
     }
 
 
 type Msg 
     = NavigateTo Route
     | FormChanged Model
-    | SaveSettings String String String
+    | SaveSettings String String String String
     | SaveSettingsResponse (WebData ())
 
 
 init : ( Model, Cmd Msg )
 init = 
-    ( Values "" "" "" |> Form.View.idle
+    ( Values "" "" "" "" |> Form.View.idle
     , Cmd.none
     )
 
@@ -63,7 +64,7 @@ update sharedState msg model =
         FormChanged newModel ->
             ( newModel, Cmd.none, NoUpdate )
 
-        SaveSettings firstName lastName email ->
+        SaveSettings firstName lastName email languageKey ->
             let
                 settings : Settings
                 settings =
@@ -71,6 +72,7 @@ update sharedState msg model =
                     , firstName = firstName
                     , lastName = lastName
                     , email = email
+                    , languageKey = languageKey
                     }
             in
             case model.state of
@@ -185,9 +187,23 @@ form sharedState =
                     }
                 }
 
+        languageField =
+            Form.selectField
+                { parser = Ok
+                , value = .languageKey
+                , update = \value values -> { values | languageKey = value }
+                , attributes =
+                    { label = translate AccountPhrases.LanguageLabel
+                    , placeholder = " - select language -"
+                    , options = 
+                        List.map
+                            (\lang -> (I18n.languageCode lang, I18n.languageName lang))
+                            I18n.supportLanguages
+                    }
+                }
     in
     Form.succeed SaveSettings
         |> Form.append firstNameField
         |> Form.append lastNameField
         |> Form.append emailField
-
+        |> Form.append languageField

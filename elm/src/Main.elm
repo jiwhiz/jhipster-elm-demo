@@ -200,7 +200,7 @@ getUserLanguage maybeUser =
             English
 
         Just user ->
-            languageFromCode user.language
+            languageFromCode user.languageKey
 
 
 updateTime : Model -> Posix -> ( Model, Cmd Msg )

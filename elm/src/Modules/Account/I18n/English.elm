@@ -38,6 +38,9 @@ translate phrase =
         RegistrationFailed ->
             "Registration failed!"
 
+        RegistrationSuccess ->
+            "Registration saved! Please check your email for confirmation."
+
         SettingsTitle username ->
             "User settings for [" ++ username ++ "]"
 

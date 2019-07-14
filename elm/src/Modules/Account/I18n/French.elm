@@ -38,6 +38,9 @@ translate phrase =
         RegistrationFailed ->
             "Compte non créé !"
 
+        RegistrationSuccess ->
+            "Compte enregistré ! Merci de vérifier votre email de confirmation."
+
         SettingsTitle username ->
             "Profil de l'utilisateur [" ++ username ++ "]"
 
