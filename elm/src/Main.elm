@@ -44,7 +44,7 @@ type alias Model =
     { appState : AppState
     , navKey : Browser.Navigation.Key
     , url : Url.Url
-    , sessionJwtToken : Maybe String
+    , maybeJwtToken : Maybe String
     }
 
 
@@ -70,7 +70,7 @@ type AppState
 init : Flags -> Url.Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
-        jwtToken = 
+        maybeJwtToken = 
             (Decode.decodeValue Decode.string flags.jwtToken |> Result.toMaybe)
     in
     ( { appState =
@@ -80,11 +80,11 @@ init flags url key =
                 (classifyDevice flags.winSize)
       , url = url
       , navKey = key
-      , sessionJwtToken = jwtToken
+      , maybeJwtToken = maybeJwtToken
       }
     , Cmd.batch
         [ Task.perform AdjustTimeZone Time.here
-        , getCurrentAccount jwtToken GetAccountResponse
+        , getCurrentAccount maybeJwtToken GetAccountResponse
         ]
     )
 
@@ -146,8 +146,7 @@ update msg model =
             updateRouter model routerMsg
 
         StorageEvent event ->
-            ( model, Cmd.none )
-            -- handleStorageEvent model event
+            handleStorageEvent model event
 
         WindowSizeChange winSize ->
             handleWindowSize model winSize
@@ -164,7 +163,7 @@ update msg model =
 
 
 getReady : Maybe User ->  Model -> ( Model, Cmd Msg )
-getReady user model =
+getReady maybeUser model =
     case model.appState of
         NotReady time zone device ->
             let
@@ -172,10 +171,10 @@ getReady user model =
                     { navKey = model.navKey
                     , currentTime = time
                     , timezone = zone
-                    , language = getUserLanguage user
+                    , language = getUserLanguage maybeUser
                     , device = device
-                    , jwtToken = model.sessionJwtToken
-                    , user = user
+                    , jwtToken = model.maybeJwtToken
+                    , user = maybeUser
                     }
 
                 ( initRouterModel, routerCmd ) =
@@ -187,7 +186,7 @@ getReady user model =
 
         Ready sharedState routerModel ->
             ( model, Cmd.none )
-                |> withErrorLog "Response from getAccount when app state is already Ready!"
+                |> withErrorLog "Response from getAccount when app state is already Ready!" -- Is this an app logic error?
 
         FailedToInitialize ->
             ( model, Cmd.none )
@@ -256,78 +255,46 @@ updateRouter model routerMsg =
             ( model, Cmd.none )
 
 
--- handleStorageEvent : Model -> LocalStorage.Event -> ( Model, Cmd Msg )
--- handleStorageEvent model event =
---     let
---         test =
---             Debug.log "handleStorageEvent" event
---     in
---     case event of
---         Updated key value ->
---             if key == jwtAuthenticationTokenKey then
---                 updateJwtToken model value
+handleStorageEvent : Model -> LocalStorage.Event -> ( Model, Cmd Msg )
+handleStorageEvent model event =
+    case event of
+        Updated key value ->
+            if key == jwtAuthenticationTokenKey then
+                updateJwtToken model value
 
---             else
---                 ( model, Cmd.none )
+            else
+                ( model, Cmd.none )
 
---         WriteFailure key value err ->
---             ( model, Cmd.none )
---                 |> withErrorLog
---                     ("Unable to write to localStorage key '"
---                         ++ key
---                         ++ "': "
---                         ++ err
---                     )
+        WriteFailure key value err ->
+            ( model, Cmd.none )
+                |> withErrorLog
+                    ("Unable to write to localStorage key '"
+                        ++ key
+                        ++ "': "
+                        ++ err
+                    )
 
---         BadMessage err ->
---             ( model, Cmd.none )
---                 |> withErrorLog ("Malformed storage event: " ++ Decode.errorToString err)
+        BadMessage err ->
+            ( model, Cmd.none )
+                |> withErrorLog ("Malformed storage event: " ++ Decode.errorToString err)
 
 
--- updateJwtToken : Model -> Maybe String -> ( Model, Cmd Msg )
--- updateJwtToken model value =
---     case value of
---         Nothing ->
---             resetJwtToken model
+updateJwtToken : Model -> Maybe String -> ( Model, Cmd Msg )
+updateJwtToken model value =
+    case model.appState of
+        Ready sharedState routerModel ->
+            case value of
+                Nothing ->
+                    -- user might be logged out, or token expired, so delete jwt token
+                    ( { model | appState = Ready (SharedState.update sharedState (UpdateJwtToken Nothing False)) routerModel }
+                    , Cmd.none
+                    )
 
---         Just jwtToken ->
---             ( { model | sessionJwtToken = Just jwtToken }
---             , getCurrentAccount (Just jwtToken) GetAccountResponse
---             )
+                Just jwtToken ->
+                    ( model, Cmd.none ) -- In what situation jwt token got updated when app state is Ready? Other window tab logged out and logged in again? Need more tests and investigation!
 
-
--- resetJwtToken : Model -> ( Model, Cmd Msg )
--- resetJwtToken model =
---     case model.appState of
---         NotReady time zone device ->
---             let
---                 initSharedState =
---                     { navKey = model.navKey
---                     , currentTime = time
---                     , timezone = zone
---                     , device = device
---                     , toggleMenu = False
---                     , accountDropdownState = False
---                     , isLoggedIn = False
---                     , jwtToken = Nothing
---                     , user = Nothing
---                     }
-
---                 ( initRouterModel, routerCmd ) =
---                     Router.init model.url
---             in
---             ( { model | appState = Ready initSharedState initRouterModel }
---             , Cmd.map RouterMsg routerCmd
---             )
-
---         Ready sharedState routerModel ->
---             -- user might be logged out, or token expired, so delete jwt token
---             ( { model | appState = Ready (SharedState.update sharedState (UpdateJwtToken Nothing)) routerModel }
---             , Cmd.none
---             )
-
---         FailedToInitialize ->
---             ( model, Cmd.none )
+        _ ->
+            ( model, Cmd.none )
 
 
 handleWindowSize : Model -> WindowSize -> ( Model, Cmd Msg )

@@ -4,7 +4,7 @@ import Api.Data.Role exposing (Role(..))
 import Api.Data.User as User exposing (User)
 import Browser.Navigation
 import Element exposing (Device)
-import I18n exposing (Language(..))
+import I18n exposing (Language(..), languageFromCode)
 import Time exposing (Posix, Zone)
 import Toasty.Defaults
 
@@ -49,7 +49,9 @@ update sharedState sharedStateUpdate =
 
         UpdateUser user ->
             -- Received for a positive login
-            { sharedState | user = Just user }
+            { sharedState 
+            | user = Just user
+            , language = languageFromCode user.languageKey }
 
         UpdateJwtToken maybeJwt rememberMe ->
             case maybeJwt of
