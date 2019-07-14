@@ -1,4 +1,4 @@
-module Pages.Login exposing (Model, Msg(..), Values, init, update, view)
+module Modules.Login.Login exposing (Model, Msg(..), Values, init, update, view)
 
 import Api.Data.JWTToken exposing (JWT)
 import Api.Data.LoginVM exposing (LoginVM)
@@ -13,15 +13,16 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
-import LocalStorage exposing (jwtAuthenticationTokenKey)
+import Modules.Login.I18n.Phrases as LoginPhrases
+import Modules.Login.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework.Alert as Alert
 import UiFramework.Form
-import UiFramework.Typography
 import UiFramework.Types exposing (Role(..), ScreenSize(..))
+import UiFramework.Typography
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
@@ -54,6 +55,10 @@ init =
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
+    let
+        translate =
+            translator sharedState.language
+    in
     case msg of
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
@@ -83,28 +88,16 @@ update sharedState msg model =
                     )
 
         LoginResponse (RemoteData.Failure err) ->
-            let
-                errorString =
-                    case err of
-                        Http.BadStatus 400 ->
-                            "Wrong Password or Username!"
-
-                        Http.BadStatus 422 ->
-                            "Your email is not confirmed!"
-
-                        _ ->
-                            "Something went wrong"
-            in
-            ( { model | state = Form.View.Error errorString }
+            ( { model | state = Form.View.Error (translate LoginPhrases.FailedLogin) }
             , Cmd.none
-            , ShowToast <| Toasty.Defaults.Error "Error" errorString
+            , ShowToast <| Toasty.Defaults.Error (translate LoginPhrases.Error) (translate LoginPhrases.FailedLogin)
             )
 
         LoginResponse (RemoteData.Success jwt) ->
             ( { model | state = Form.View.Idle }
             , Utils.perform <|
                 ShowToastAndRedirect <|
-                    Toasty.Defaults.Success "Logged in" "You are now logged in."
+                    Toasty.Defaults.Success (translate LoginPhrases.Success) (translate <| LoginPhrases.LoggedIn)
             , UpdateJwtToken (Just jwt.token) model.values.rememberMe
             )
 
@@ -120,10 +113,17 @@ update sharedState msg model =
 
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     ( "Login"
     , el
-        [ height fill, centerX, paddingXY 10 10 ]
-        ( case sharedState.user of
+        [ height fill
+        , width fill
+        , centerX
+        , paddingXY 100 10 ]
+        (case sharedState.user of
             Just user ->
                 el
                     [ paddingXY 30 30
@@ -131,7 +131,7 @@ view sharedState model =
                     , Font.color (rgb255 59 59 59)
                     , Font.light
                     ]
-                    (text <| "You are logged in as " ++ user.username)
+                    (text <| translate <| LoginPhrases.LoggedInAs user.username)
 
             Nothing ->
                 content sharedState model
@@ -141,6 +141,10 @@ view sharedState model =
 
 content : SharedState -> Model -> Element Msg
 content sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     column
         [ width fill
         , height fill
@@ -156,49 +160,47 @@ content sharedState model =
             , Font.color (rgb255 59 59 59)
             , Font.light
             ]
-            ( text "Sign in" )
-        , loginFormView model
+            (text <| translate LoginPhrases.LoginTitle)
+        , UiFramework.Form.layout
+            { onChange = FormChanged
+            , action = translate LoginPhrases.SignInButtonLabel
+            , loading = translate LoginPhrases.SignInLoadingLabel
+            , validation = Form.View.ValidateOnSubmit
+            }
+            (form sharedState)
+            model
         , Alert.simple Warning <|
-            ( Alert.link Warning
+            Alert.link Warning
                 { onPress = Just <| NavigateTo PasswordResetRequest
-                , label = text "Did you forget your password?"
+                , label = text <| translate LoginPhrases.ForgetPassword
                 }
-            )
         , Alert.simple Warning <|
             paragraph
                 [ Font.alignLeft ]
-                [ text "You don't have an account yet? "
+                [ text <| translate LoginPhrases.NoAccountYet
+                , text " "
                 , Alert.link Warning
                     { onPress = Just <| NavigateTo Register
-                    , label = text "Register a new account"
+                    , label = text <| translate LoginPhrases.RegisterNewAccount
                     }
                 ]
         ]
 
 
-loginFormView : Form.View.Model Values -> Element Msg
-loginFormView model =
-    UiFramework.Form.layout
-        { onChange = FormChanged
-        , action = "Login"
-        , loading = "Logging in..."
-        , validation = Form.View.ValidateOnSubmit
-        }
-        form
-        model
-
-
-form : Form Values Msg
-form =
+form : SharedState -> Form Values Msg
+form sharedState =
     let
+        translate =
+            translator sharedState.language
+
         usernameField =
             Form.textField
                 { parser = Ok
                 , value = .username
                 , update = \value values -> { values | username = value }
                 , attributes =
-                    { label = "Username"
-                    , placeholder = "Your username"
+                    { label = translate LoginPhrases.UsernameLabel
+                    , placeholder = translate LoginPhrases.UsernamePlaceholder
                     }
                 }
 
@@ -208,8 +210,8 @@ form =
                 , value = .password
                 , update = \value values -> { values | password = value }
                 , attributes =
-                    { label = "Password"
-                    , placeholder = "Your password"
+                    { label = translate LoginPhrases.PasswordLabel
+                    , placeholder = translate LoginPhrases.PasswordPlaceholder
                     }
                 }
 
@@ -219,7 +221,7 @@ form =
                 , value = .rememberMe
                 , update = \value values -> { values | rememberMe = value }
                 , attributes =
-                    { label = "Remember me" }
+                    { label = translate LoginPhrases.RememberMeLabel }
                 }
     in
     Form.succeed Login

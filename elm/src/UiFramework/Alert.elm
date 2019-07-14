@@ -129,7 +129,7 @@ viewAttributes options =
     [ width fill
     , paddingXY 20 16
     , Font.alignLeft
-    , Font.size 16
+    , Font.size fontSize
     , Font.color fontColor
     , Border.rounded 4
     , Border.width 1

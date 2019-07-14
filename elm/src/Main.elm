@@ -7,13 +7,10 @@ import Browser.Events
 import Browser.Navigation
 import Element exposing (Device, classifyDevice)
 import Html
-import I18n.I18n exposing (Language(..), languageFromCode)
+import I18n exposing(Language(..), languageFromCode)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
-import Pages.Home
-import Pages.Login
-import Pages.NotFound
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
 import Routes

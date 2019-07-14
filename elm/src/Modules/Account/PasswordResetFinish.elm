@@ -1,4 +1,4 @@
-module Pages.PasswordResetFinish exposing (Model, Msg(..), Values, content, form, init, update, view)
+module Modules.Account.PasswordResetFinish exposing (Model, Msg(..), Values, content, form, init, update, view)
 
 import Api.Data.KeyAndPasswordVM exposing(KeyAndPasswordVM)
 import Api.Request.Account exposing (resetPassword)
@@ -11,12 +11,17 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
+import Modules.Account.I18n.Phrases as AccountPhrases
+import Modules.Account.I18n.Translator exposing(translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
+import UiFramework.Alert as Alert
 import UiFramework.Form
 import UiFramework.Toasty
+import UiFramework.Types exposing (Role(..))
+import UiFramework.Typography exposing (h1)
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
@@ -51,6 +56,10 @@ init key =
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
+    let
+        translate =
+            translator sharedState.language
+    in
     case msg of
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
@@ -87,10 +96,10 @@ update sharedState msg model =
                 errorString =
                     case err of
                         Http.BadStatus 400 ->
-                            "Your password couldn't be reset. Remember a password request is only valid for 24 hours."
+                            translate AccountPhrases.CannotReset
 
                         _ ->
-                            "Something went wrong"
+                            translate AccountPhrases.ServerError
             in
             let
                 oldResetForm = model.resetForm
@@ -100,7 +109,7 @@ update sharedState msg model =
             
             ( { model | resetForm = newResetForm }
             , Cmd.none
-            , ShowToast <| Toasty.Defaults.Error "Reset Password Error" errorString
+            , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         ResetResponse (RemoteData.Success ()) ->
@@ -113,36 +122,39 @@ update sharedState msg model =
             , Utils.perform <| NavigateTo Login
             , ShowToast <|
                 Toasty.Defaults.Success
-                    "Reset Password Succeeded"
-                    "<strong>Your password has been reset.</strong> Please login with new password."
+                    (translate AccountPhrases.Success)
+                    (translate AccountPhrases.ResetSuccess)
             )
 
         ResetResponse _ ->
             ( model, Cmd.none, NoUpdate )
 
 
-view : Model -> ( String, Element Msg )
-view model =
+view : SharedState -> Model -> ( String, Element Msg )
+view sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     ( "Reset"
     , el
-        [ height fill, centerX, paddingXY 10 10 ]
+        [ width fill, height fill, centerX, paddingXY 10 10 ]
         ( case model.key of
             Nothing ->
-                el
-                    [ paddingXY 30 30
-                    , Font.size 28
-                    , Font.color (rgb255 59 59 59) -- warning color
-                    , Font.light
-                    ]
-                    ( text "The reset key is missing." )
+                Alert.simple Danger <|
+                    ( text <| translate AccountPhrases.MissingResetKey )
             Just k ->
-                content model
+                content sharedState model
         )
     )
 
 
-content : Model -> Element Msg
-content model =
+content : SharedState -> Model -> Element Msg
+content sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     column
         [ width fill
         , height fill
@@ -150,35 +162,34 @@ content model =
         , spacing 20
         , Font.alignLeft
         ]
-        [ el
-            [ paddingXY 0 30
-            , Font.size 28
-            , Font.color (rgb255 59 59 59)
-            , Font.light
-            ]
-            (text "Reset your password")
+        [ h1
+            [ paddingXY 0 30 ]
+            ( text <| translate AccountPhrases.ResetPasswordTitle )
         , UiFramework.Form.layout
             { onChange = FormChanged
-            , action = "Validate new password"
-            , loading = "Submitting..."
+            , action = translate AccountPhrases.ResetButtonLabel
+            , loading = translate AccountPhrases.ResetButtonLoading
             , validation = Form.View.ValidateOnSubmit
             }
-            form
+            (form sharedState)
             model.resetForm
         ]
 
 
-form : Form Values Msg
-form =
+form : SharedState -> Form Values Msg
+form sharedState =
     let
+        translate =
+            translator sharedState.language
+
         passwordField =
             Form.passwordField
                 { parser = Ok
                 , value = .password
                 , update = \value values -> { values | password = value }
                 , attributes =
-                    { label = "New password"
-                    , placeholder = "New password"
+                    { label = translate AccountPhrases.NewPasswordLabel
+                    , placeholder = translate AccountPhrases.NewPasswordPlaceholder
                     }
                 }
 
@@ -192,14 +203,14 @@ form =
                                     Ok ()
 
                                 else
-                                    Err "The passwords do not match"
+                                    Err <| translate AccountPhrases.PasswordNotMatch
                         , value = .repeatPassword
                         , update =
                             \newValue values_ ->
                                 { values_ | repeatPassword = newValue }
                         , attributes =
-                            { label = "New password confirmation"
-                            , placeholder = "Conform the new password"
+                            { label = translate AccountPhrases.ConfirmPasswordLabel
+                            , placeholder = translate AccountPhrases.ConfirmPasswordPlaceholder
                             }
                         }
                 )

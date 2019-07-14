@@ -1,4 +1,4 @@
-module Pages.Logout exposing (..)
+module Modules.Login.Logout exposing (..)
 
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
@@ -6,8 +6,12 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import LocalStorage exposing (jwtAuthenticationTokenKey)
+import Modules.Login.I18n.Phrases as LoginPhrases
+import Modules.Login.I18n.Translator exposing (translator)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
+import UiFramework.Alert as Alert
+import UiFramework.Types exposing (Role(..))
 
 
 type alias Model =
@@ -30,17 +34,21 @@ update sharedState msg model =
             ( model, Cmd.none, NoUpdate )
 
 
-view : Model -> ( String, Element Msg )
-view model =
+view : SharedState -> Model -> ( String, Element Msg )
+view sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     ( "Logout"
     , el
-        [ height fill
+        [ width fill
+        , height fill
         , alignLeft
         , paddingXY 30 50
-        , Font.size 28
-        , Font.color (rgb255 59 59 59)
-        , Font.medium
         ]
-        (text "Logged out successfully!")
+        ( Alert.simple Success <|
+            text <| translate LoginPhrases.LogoutTitle
+        )
     )
 

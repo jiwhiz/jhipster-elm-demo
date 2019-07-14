@@ -1,10 +1,10 @@
-module SharedState exposing (SharedState, SharedStateUpdate(..), update, displayUsername)
+module SharedState exposing (SharedState, SharedStateUpdate(..), update, getUsername)
 
 import Api.Data.Role exposing (Role(..))
 import Api.Data.User as User exposing (User)
 import Browser.Navigation
 import Element exposing (Device)
-import I18n.I18n exposing (Language(..))
+import I18n exposing (Language(..))
 import Time exposing (Posix, Zone)
 import Toasty.Defaults
 
@@ -69,8 +69,8 @@ update sharedState sharedStateUpdate =
             sharedState
 
 
-displayUsername : SharedState -> String
-displayUsername sharedState =
+getUsername : SharedState -> String
+getUsername sharedState =
     case sharedState.user of
         Nothing ->
             ""

@@ -1,4 +1,4 @@
-module Pages.Settings exposing (..)
+module Modules.Account.Settings exposing (..)
 
 import Api.Data.Settings exposing(Settings)
 import Api.Request.Account exposing(updateSettings)
@@ -12,12 +12,15 @@ import Form exposing (Form)
 import Form.View
 import Http
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import Modules.Account.I18n.Phrases as AccountPhrases
+import Modules.Account.I18n.Translator exposing(translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..), displayUsername)
+import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Typography exposing (h1)
 import Utils
 
 
@@ -49,6 +52,10 @@ init =
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
+    let
+        translate =
+            translator sharedState.language
+    in
     case msg of
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
@@ -60,7 +67,8 @@ update sharedState msg model =
             let
                 settings : Settings
                 settings =
-                    { firstName = firstName
+                    { username = SharedState.getUsername sharedState
+                    , firstName = firstName
                     , lastName = lastName
                     , email = email
                     }
@@ -80,14 +88,14 @@ update sharedState msg model =
                 errorString =
                     case err of
                         Http.BadStatus 400 ->
-                            "Email is already in use!"
+                            translate AccountPhrases.CannotSaveSettings
 
                         _ ->
-                            "An error has occurred! Settings could not be saved."
+                            translate AccountPhrases.ServerError
             in
             ( { model | state = Form.View.Error errorString }
             , Cmd.none
-            , ShowToast <| Toasty.Defaults.Error "Error" errorString
+            , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         SaveSettingsResponse (RemoteData.Success ()) ->
@@ -95,8 +103,8 @@ update sharedState msg model =
             , Cmd.none
             , ShowToast <| 
                 Toasty.Defaults.Success
-                    "Success"
-                    "Settings saved!"
+                    (translate AccountPhrases.Success)
+                    (translate AccountPhrases.SaveSuccess)
             )
 
         SaveSettingsResponse _ ->
@@ -106,14 +114,18 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Settings"
-    , el 
-        [ height fill, centerX, paddingXY 10 10]
+    , el
+        [ width fill, height fill, centerX, paddingXY 100 10]
         ( content sharedState model )
     )
 
 
 content : SharedState -> Model -> Element Msg
 content sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     column
         [ width fill
         , height fill
@@ -121,47 +133,33 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ subTitle sharedState
-        , settingsFormView model
+        [ h1 [paddingXY 0 30]
+            (text <| translate <| AccountPhrases.SettingsTitle (SharedState.getUsername sharedState))
+        , UiFramework.Form.layout
+            { onChange = FormChanged
+            , action = translate AccountPhrases.SaveButtonLabel
+            , loading = translate AccountPhrases.SaveButtonLoading
+            , validation = Form.View.ValidateOnSubmit
+            }
+            (form sharedState)
+            model
         ]
 
 
-subTitle : SharedState -> Element Msg
-subTitle sharedState =
-    el
-        [ alignLeft
-        , paddingXY 0 10
-        , Font.size 30
-        , Font.color (rgb255 59 59 59)
-        , Font.bold
-        ]
-        ( text <| "User settings for [" ++ (SharedState.displayUsername sharedState) ++ "]"
-        )
-
-
-settingsFormView : Model -> Element Msg
-settingsFormView model =
-    UiFramework.Form.layout
-        { onChange = FormChanged
-        , action = "Save"
-        , loading = "Submitting..."
-        , validation = Form.View.ValidateOnSubmit
-        }
-        form
-        model
-
-
-form : Form Values Msg
-form =
+form : SharedState -> Form Values Msg
+form sharedState =
     let
+        translate =
+            translator sharedState.language
+
         firstNameField =
             Form.textField
                 { parser = Ok
                 , value = .firstName
                 , update = \value values -> { values | firstName = value }
                 , attributes =
-                    { label = "First Name"
-                    , placeholder = "Your first name"
+                    { label = translate AccountPhrases.FirstnameLabel
+                    , placeholder = translate AccountPhrases.FirstnamePlaceholder
                     }
                 }
 
@@ -171,8 +169,8 @@ form =
                 , value = .lastName
                 , update = \value values -> { values | lastName = value }
                 , attributes =
-                    { label = "Last Name"
-                    , placeholder = "Your last name"
+                    { label = translate AccountPhrases.LastnameLabel
+                    , placeholder = translate AccountPhrases.LastnamePlaceholder
                     }
                 }
 
@@ -182,8 +180,8 @@ form =
                 , value = .email
                 , update = \value values -> { values | email = value }
                 , attributes =
-                    { label = "Email"
-                    , placeholder = "Your email"
+                    { label = translate AccountPhrases.EmailLabel
+                    , placeholder = translate AccountPhrases.EmailPlaceholder
                     }
                 }
 
