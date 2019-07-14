@@ -120,10 +120,6 @@ subscriptions sharedState model =
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
-    let
-        test =
-            Debug.log "==>Router.update Msg" msg
-    in
     case ( msg, model.currentPage ) of
         ( UrlChanged location, _ ) ->
             let
@@ -306,7 +302,7 @@ updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
 
 navigateTo : Route -> SharedState -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 navigateTo route sharedState model =
-    case Debug.log "==>Router.navigateTo" route of
+    case route of
         Home ->
             Home.init |> initWith HomePage HomeMsg model NoUpdate
 
