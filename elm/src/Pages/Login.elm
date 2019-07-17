@@ -20,8 +20,9 @@ import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework.Alert as Alert
 import UiFramework.Form
-import UiFramework.Typography
+import UiFramework.Padding
 import UiFramework.Types exposing (Role(..), ScreenSize(..))
+import UiFramework.Typography
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
@@ -92,8 +93,8 @@ update sharedState msg model =
                         Http.BadStatus 422 ->
                             "Your email is not confirmed!"
 
-                        _ ->
-                            "Something went wrong"
+                        error ->
+                            "Something went wrong: " ++ Debug.toString error
             in
             ( { model | state = Form.View.Error errorString }
             , Cmd.none
@@ -122,8 +123,8 @@ view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Login"
     , el
-        [ height fill, centerX, paddingXY 10 10 ]
-        ( case sharedState.user of
+        [ height fill, width fill, paddingXY 10 10 ]
+        (case sharedState.user of
             Just user ->
                 el
                     [ paddingXY 30 30
@@ -156,14 +157,13 @@ content sharedState model =
             , Font.color (rgb255 59 59 59)
             , Font.light
             ]
-            ( text "Sign in" )
+            (text "Sign in")
         , loginFormView model
         , Alert.simple Warning <|
-            ( Alert.link Warning
+            Alert.link Warning
                 { onPress = Just <| NavigateTo PasswordResetRequest
                 , label = text "Did you forget your password?"
                 }
-            )
         , Alert.simple Warning <|
             paragraph
                 [ Font.alignLeft ]
@@ -174,6 +174,7 @@ content sharedState model =
                     }
                 ]
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 loginFormView : Form.View.Model Values -> Element Msg

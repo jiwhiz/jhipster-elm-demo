@@ -1,6 +1,6 @@
-module Pages.PasswordResetRequest exposing (..)
+module Pages.PasswordResetRequest exposing (Model, Msg(..), Values, content, form, init, update, view)
 
-import Api.Request.Account exposing(requestResetPassword)
+import Api.Request.Account exposing (requestResetPassword)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Background as Background
@@ -14,13 +14,13 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
 import UiFramework.Toasty
 import Utils
+import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     Form.View.Model Values
 
 
@@ -29,7 +29,7 @@ type alias Values =
     }
 
 
-type Msg 
+type Msg
     = NavigateTo Route
     | FormChanged Model
     | ResetRequest String
@@ -37,7 +37,7 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( Values "" |> Form.View.idle
     , Cmd.none
     )
@@ -84,7 +84,7 @@ update sharedState msg model =
         ResetResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , ShowToast <| 
+            , ShowToast <|
                 Toasty.Defaults.Success
                     "Reset Password Request Sent"
                     "Check your emails for details on how to reset your password."
@@ -97,9 +97,9 @@ update sharedState msg model =
 view : Model -> ( String, Element Msg )
 view model =
     ( "Reset"
-    , el 
-        [ height fill, centerX, paddingXY 10 10]
-        ( content model )
+    , el
+        [ height fill, centerX, paddingXY 10 10 ]
+        (content model)
     )
 
 
@@ -118,7 +118,7 @@ content model =
             , Font.color (rgb255 59 59 59)
             , Font.light
             ]
-            ( text "Reset your password" )
+            (text "Reset your password")
         , UiFramework.Form.layout
             { onChange = FormChanged
             , action = "Reset password"
@@ -146,4 +146,3 @@ form =
     in
     Form.succeed ResetRequest
         |> Form.append emailField
-

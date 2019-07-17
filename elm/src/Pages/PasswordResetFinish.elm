@@ -199,7 +199,7 @@ form =
                                 { values_ | repeatPassword = newValue }
                         , attributes =
                             { label = "New password confirmation"
-                            , placeholder = "Conform the new password"
+                            , placeholder = "Confirm the new password"
                             }
                         }
                 )

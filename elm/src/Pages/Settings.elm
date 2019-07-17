@@ -1,7 +1,7 @@
-module Pages.Settings exposing (..)
+module Pages.Settings exposing (Model, Msg(..), Values, content, form, init, settingsFormView, subTitle, update, view)
 
-import Api.Data.Settings exposing(Settings)
-import Api.Request.Account exposing(updateSettings)
+import Api.Data.Settings exposing (Settings)
+import Api.Request.Account exposing (updateSettings)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Background as Background
@@ -16,12 +16,13 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..), displayUsername)
 import Toasty.Defaults
-import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Padding
 import Utils
+import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     Form.View.Model Values
 
 
@@ -29,11 +30,12 @@ type alias Values =
     { firstName : String
     , lastName : String
     , email : String
+
     -- , language : String  TODO: add language after i18n
     }
 
 
-type Msg 
+type Msg
     = NavigateTo Route
     | FormChanged Model
     | SaveSettings String String String
@@ -41,7 +43,7 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( Values "" "" "" |> Form.View.idle
     , Cmd.none
     )
@@ -93,7 +95,7 @@ update sharedState msg model =
         SaveSettingsResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , ShowToast <| 
+            , ShowToast <|
                 Toasty.Defaults.Success
                     "Success"
                     "Settings saved!"
@@ -106,9 +108,9 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Settings"
-    , el 
-        [ height fill, centerX, paddingXY 10 10]
-        ( content sharedState model )
+    , el
+        [ height fill, width fill, paddingXY 10 10 ]
+        (content sharedState model)
     )
 
 
@@ -124,18 +126,27 @@ content sharedState model =
         [ subTitle sharedState
         , settingsFormView model
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 subTitle : SharedState -> Element Msg
 subTitle sharedState =
+    let
+        user =
+            el [ Font.bold ] (text (SharedState.displayUsername sharedState))
+    in
     el
         [ alignLeft
-        , paddingXY 0 10
+        , paddingXY 0 30
         , Font.size 30
         , Font.color (rgb255 59 59 59)
-        , Font.bold
+        , Font.light
         ]
-        ( text <| "User settings for [" ++ (SharedState.displayUsername sharedState) ++ "]"
+        (paragraph []
+            [ text "User settings for ["
+            , user
+            , text "]"
+            ]
         )
 
 
@@ -186,10 +197,8 @@ form =
                     , placeholder = "Your email"
                     }
                 }
-
     in
     Form.succeed SaveSettings
         |> Form.append firstNameField
         |> Form.append lastNameField
         |> Form.append emailField
-

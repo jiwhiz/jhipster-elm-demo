@@ -252,7 +252,7 @@ viewCollapsedMenuList state items =
 viewMenubarList : NavbarState state -> List (MenuItem msg state) -> Element msg
 viewMenubarList state items =
     row [ Region.navigation
-        , paddingEach { top = 30, right = 30, bottom = 10, left = 100}
+        , paddingEach { top = 20, right = 30, bottom = 20, left = 100}
         , spacing 15
         , alignRight
         , Font.size 16
