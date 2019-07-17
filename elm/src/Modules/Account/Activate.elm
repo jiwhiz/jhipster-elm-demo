@@ -11,24 +11,26 @@ import Form exposing (Form)
 import Form.View
 import Http
 import Modules.Account.I18n.Phrases as AccountPhrases
-import Modules.Account.I18n.Translator exposing(translator)
+import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework.Alert as Alert
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Form
+import UiFramework.Padding
 import UiFramework.Toasty
+import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     { key : Maybe String
     , activateState : ActivateState
     }
+
 
 type ActivateState
     = NoKey
@@ -70,7 +72,6 @@ update sharedState msg model =
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
 
-
         ActivateResponse (RemoteData.Failure err) ->
             let
                 errorString =
@@ -80,14 +81,14 @@ update sharedState msg model =
 
                         _ ->
                             translate AccountPhrases.ServerError
-            in            
+            in
             ( { model | activateState = Failed errorString }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         ActivateResponse (RemoteData.Success ()) ->
-            ( { model |  activateState = Succeeded }
+            ( { model | activateState = Succeeded }
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
@@ -102,10 +103,11 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Activation"
-    , el 
-        [ width fill, height fill, centerX, paddingXY 100 10]
-        ( content sharedState model )
+    , el
+        [ width fill, height fill, centerX, paddingXY 100 10 ]
+        (content sharedState model)
     )
+
 
 content sharedState model =
     let
@@ -124,11 +126,13 @@ content sharedState model =
         , case model.activateState of
             NoKey ->
                 Alert.simple Warning <|
-                    text <| translate AccountPhrases.MissingActivationKey
+                    text <|
+                        translate AccountPhrases.MissingActivationKey
 
             Activating ->
                 Alert.simple Primary <|
-                    text <| translate AccountPhrases.Activating
+                    text <|
+                        translate AccountPhrases.Activating
 
             Succeeded ->
                 Alert.simple Success <|
@@ -143,10 +147,11 @@ content sharedState model =
             Failed err ->
                 Alert.simple Danger <|
                     paragraph []
-                        [ text err 
+                        [ text err
                         , Alert.link Danger
                             { onPress = Just <| NavigateTo Register
                             , label = text <| translate AccountPhrases.UseRegistrationToSignup
                             }
                         ]
         ]
+        |> UiFramework.Padding.responsive sharedState
