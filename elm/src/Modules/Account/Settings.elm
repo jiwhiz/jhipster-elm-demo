@@ -1,4 +1,4 @@
-module Pages.Settings exposing (Model, Msg(..), Values, content, form, init, settingsFormView, subTitle, update, view)
+module Modules.Account.Settings exposing (Model, Msg(..), Values, content, form, init, update, view)
 
 import Api.Data.Settings exposing (Settings)
 import Api.Request.Account exposing (updateSettings)
@@ -11,13 +11,17 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
+import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import Modules.Account.I18n.Phrases as AccountPhrases
+import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..), displayUsername)
+import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework.Form
 import UiFramework.Padding
+import UiFramework.Typography exposing (h1)
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
@@ -30,27 +34,30 @@ type alias Values =
     { firstName : String
     , lastName : String
     , email : String
-
-    -- , language : String  TODO: add language after i18n
+    , languageKey : String
     }
 
 
 type Msg
     = NavigateTo Route
     | FormChanged Model
-    | SaveSettings String String String
+    | SaveSettings String String String String
     | SaveSettingsResponse (WebData ())
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Values "" "" "" |> Form.View.idle
+    ( Values "" "" "" "" |> Form.View.idle
     , Cmd.none
     )
 
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
+    let
+        translate =
+            translator sharedState.language
+    in
     case msg of
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
@@ -58,13 +65,15 @@ update sharedState msg model =
         FormChanged newModel ->
             ( newModel, Cmd.none, NoUpdate )
 
-        SaveSettings firstName lastName email ->
+        SaveSettings firstName lastName email languageKey ->
             let
                 settings : Settings
                 settings =
-                    { firstName = firstName
+                    { username = SharedState.getUsername sharedState
+                    , firstName = firstName
                     , lastName = lastName
                     , email = email
+                    , languageKey = languageKey
                     }
             in
             case model.state of
@@ -82,14 +91,14 @@ update sharedState msg model =
                 errorString =
                     case err of
                         Http.BadStatus 400 ->
-                            "Email is already in use!"
+                            translate AccountPhrases.CannotSaveSettings
 
                         _ ->
-                            "An error has occurred! Settings could not be saved."
+                            translate AccountPhrases.ServerError
             in
             ( { model | state = Form.View.Error errorString }
             , Cmd.none
-            , ShowToast <| Toasty.Defaults.Error "Error" errorString
+            , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         SaveSettingsResponse (RemoteData.Success ()) ->
@@ -97,8 +106,8 @@ update sharedState msg model =
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
-                    "Success"
-                    "Settings saved!"
+                    (translate AccountPhrases.Success)
+                    (translate AccountPhrases.SaveSuccess)
             )
 
         SaveSettingsResponse _ ->
@@ -116,6 +125,10 @@ view sharedState model =
 
 content : SharedState -> Model -> Element Msg
 content sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     column
         [ width fill
         , height fill
@@ -123,56 +136,34 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ subTitle sharedState
-        , settingsFormView model
+        [ h1 [ paddingXY 0 30 ]
+            (text <| translate <| AccountPhrases.SettingsTitle (SharedState.getUsername sharedState))
+        , UiFramework.Form.layout
+            { onChange = FormChanged
+            , action = translate AccountPhrases.SaveButtonLabel
+            , loading = translate AccountPhrases.SaveButtonLoading
+            , validation = Form.View.ValidateOnSubmit
+            }
+            (form sharedState)
+            model
         ]
         |> UiFramework.Padding.responsive sharedState
 
 
-subTitle : SharedState -> Element Msg
-subTitle sharedState =
+form : SharedState -> Form Values Msg
+form sharedState =
     let
-        user =
-            el [ Font.bold ] (text (SharedState.displayUsername sharedState))
-    in
-    el
-        [ alignLeft
-        , paddingXY 0 30
-        , Font.size 30
-        , Font.color (rgb255 59 59 59)
-        , Font.light
-        ]
-        (paragraph []
-            [ text "User settings for ["
-            , user
-            , text "]"
-            ]
-        )
+        translate =
+            translator sharedState.language
 
-
-settingsFormView : Model -> Element Msg
-settingsFormView model =
-    UiFramework.Form.layout
-        { onChange = FormChanged
-        , action = "Save"
-        , loading = "Submitting..."
-        , validation = Form.View.ValidateOnSubmit
-        }
-        form
-        model
-
-
-form : Form Values Msg
-form =
-    let
         firstNameField =
             Form.textField
                 { parser = Ok
                 , value = .firstName
                 , update = \value values -> { values | firstName = value }
                 , attributes =
-                    { label = "First Name"
-                    , placeholder = "Your first name"
+                    { label = translate AccountPhrases.FirstnameLabel
+                    , placeholder = translate AccountPhrases.FirstnamePlaceholder
                     }
                 }
 
@@ -182,8 +173,8 @@ form =
                 , value = .lastName
                 , update = \value values -> { values | lastName = value }
                 , attributes =
-                    { label = "Last Name"
-                    , placeholder = "Your last name"
+                    { label = translate AccountPhrases.LastnameLabel
+                    , placeholder = translate AccountPhrases.LastnamePlaceholder
                     }
                 }
 
@@ -193,8 +184,23 @@ form =
                 , value = .email
                 , update = \value values -> { values | email = value }
                 , attributes =
-                    { label = "Email"
-                    , placeholder = "Your email"
+                    { label = translate AccountPhrases.EmailLabel
+                    , placeholder = translate AccountPhrases.EmailPlaceholder
+                    }
+                }
+
+        languageField =
+            Form.selectField
+                { parser = Ok
+                , value = .languageKey
+                , update = \value values -> { values | languageKey = value }
+                , attributes =
+                    { label = translate AccountPhrases.LanguageLabel
+                    , placeholder = " - select language -"
+                    , options =
+                        List.map
+                            (\lang -> ( I18n.languageCode lang, I18n.languageName lang ))
+                            I18n.supportLanguages
                     }
                 }
     in
@@ -202,3 +208,4 @@ form =
         |> Form.append firstNameField
         |> Form.append lastNameField
         |> Form.append emailField
+        |> Form.append languageField

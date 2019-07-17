@@ -10,6 +10,7 @@ type alias RegisterVM =
     { username : Maybe String
     , email : Maybe String
     , password : Maybe String
+    , languageKey : Maybe String
     }
 
 
@@ -19,6 +20,7 @@ decoder =
         |> optional "login" (Decode.nullable Decode.string) Nothing
         |> optional "email" (Decode.nullable Decode.string) Nothing
         |> optional "password" (Decode.nullable Decode.string) Nothing
+        |> optional "langKey" (Decode.nullable Decode.string) Nothing
 
 
 encoder : RegisterVM -> Encode.Value
@@ -27,5 +29,5 @@ encoder model =
         [ ( "login", maybe Encode.string model.username )
         , ( "email", maybe Encode.string model.email )
         , ( "password", maybe Encode.string model.password )
-        , ( "langKey", Encode.string "en" )
+        , ( "langKey", maybe Encode.string model.languageKey )
         ]

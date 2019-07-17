@@ -127,7 +127,7 @@ contrastTextColor backgroundColor darkColor lightColor =
             toRgb backgroundColor
 
         contrast =
-            Debug.log "contrast" <| ((rgbRec.red * 299.0) + (rgbRec.green * 587.0) + (rgbRec.blue * 114.0)) * 256 / 1000.0
+            ((rgbRec.red * 299.0) + (rgbRec.green * 587.0) + (rgbRec.blue * 114.0)) * 256 / 1000.0
     in
     if contrast > 150.0 then
         darkColor
@@ -383,7 +383,7 @@ darken : Float -> Color -> Color
 darken offset cl =
     let
         { hue, saturation, lightness, alpha } =
-            Debug.log "hsla" <| toHsla cl
+            toHsla cl
     in
     hsla hue saturation (limit (lightness - offset)) alpha
 

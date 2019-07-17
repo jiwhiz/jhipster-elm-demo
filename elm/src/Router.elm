@@ -14,19 +14,19 @@ import FontAwesome.Solid
 import FontAwesome.Styles
 import Html exposing (Html)
 import Html.Events
-import I18n.I18n as I18n
+import I18n
 import Json.Decode as Json
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
-import Pages.Activation
-import Pages.Home
-import Pages.Login
-import Pages.Logout
-import Pages.NotFound
-import Pages.PasswordResetFinish
-import Pages.PasswordResetRequest
-import Pages.PasswordUpdate
-import Pages.Register
-import Pages.Settings
+import Modules.Account.Activate as Activate
+import Modules.Home.Home as Home
+import Modules.Login.Login as Login
+import Modules.Login.Logout as Logout
+import Modules.Error.NotFound as NotFound
+import Modules.Account.PasswordResetFinish as PasswordResetFinish
+import Modules.Account.PasswordResetRequest as PasswordResetRequest
+import Modules.Account.PasswordUpdate as PasswordUpdate
+import Modules.Account.Register as Register
+import Modules.Account.Settings as Settings
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), fromUrl, routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
@@ -47,7 +47,6 @@ type alias Model =
     , toggleMenuState : Bool
     , dropdownMenuState : DropdownMenuState
     , loginDialogState : Bool
-    , plain_password : String -- Only used for the modal refresh login dialog
     , toasties : Toasty.Stack Toasty.Defaults.Toast
     }
 
@@ -59,16 +58,16 @@ type DropdownMenuState
 
 
 type Page
-    = NotFoundPage Pages.NotFound.Model
-    | HomePage Pages.Home.Model
-    | LoginPage Pages.Login.Model
-    | LogoutPage Pages.Logout.Model
-    | RegisterPage Pages.Register.Model
-    | PasswordResetRequestPage Pages.PasswordResetRequest.Model
-    | PasswordResetFinishPage Pages.PasswordResetFinish.Model
-    | SettingsPage Pages.Settings.Model
-    | PasswordUpdatePage Pages.PasswordUpdate.Model
-    | ActivatePage Pages.Activation.Model
+    = NotFoundPage NotFound.Model
+    | HomePage Home.Model
+    | LoginPage Login.Model
+    | LogoutPage Logout.Model
+    | RegisterPage Register.Model
+    | PasswordResetRequestPage PasswordResetRequest.Model
+    | PasswordResetFinishPage PasswordResetFinish.Model
+    | SettingsPage Settings.Model
+    | PasswordUpdatePage PasswordUpdate.Model
+    | ActivatePage Activate.Model
 
 
 type Msg
@@ -81,16 +80,16 @@ type Msg
     | ToggleLanguageDropdown
     | CloseDropdown
     | SelectLanguage I18n.Language
-    | HomeMsg Pages.Home.Msg
-    | LoginMsg Pages.Login.Msg
-    | LogoutMsg Pages.Logout.Msg
-    | RegisterMsg Pages.Register.Msg
-    | NotFoundMsg Pages.NotFound.Msg
-    | PasswordResetRequestMsg Pages.PasswordResetRequest.Msg
-    | PasswordResetFinishMsg Pages.PasswordResetFinish.Msg
-    | SettingsMsg Pages.Settings.Msg
-    | PasswordUpdateMsg Pages.PasswordUpdate.Msg
-    | ActivateMsg Pages.Activation.Msg
+    | HomeMsg Home.Msg
+    | LoginMsg Login.Msg
+    | LogoutMsg Logout.Msg
+    | RegisterMsg Register.Msg
+    | NotFoundMsg NotFound.Msg
+    | PasswordResetRequestMsg PasswordResetRequest.Msg
+    | PasswordResetFinishMsg PasswordResetFinish.Msg
+    | SettingsMsg Settings.Msg
+    | PasswordUpdateMsg PasswordUpdate.Msg
+    | ActivateMsg Activate.Msg
     | NoOp
 
 
@@ -105,7 +104,6 @@ init url =
       , toggleMenuState = False
       , dropdownMenuState = AllClosed
       , loginDialogState = False
-      , plain_password = ""
       , toasties = Toasty.initialState
       }
     , (Task.perform identity << Task.succeed) <| UrlChanged url
@@ -122,10 +120,6 @@ subscriptions sharedState model =
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
-    let
-        test =
-            Debug.log "==>Router.update Msg" msg
-    in
     case ( msg, model.currentPage ) of
         ( UrlChanged location, _ ) ->
             let
@@ -216,39 +210,39 @@ update sharedState msg model =
                 |> Utils.flip Utils.tupleExtend NoUpdate
 
         ( HomeMsg subMsg, HomePage subModel ) ->
-            Pages.Home.update sharedState subMsg subModel
+            Home.update sharedState subMsg subModel
                 |> updateWith HomePage HomeMsg model
 
         ( LoginMsg subMsg, LoginPage subModel ) ->
-            Pages.Login.update sharedState subMsg subModel
+            Login.update sharedState subMsg subModel
                 |> updateWith LoginPage LoginMsg model
 
         ( LogoutMsg subMsg, LogoutPage subModel ) ->
-            Pages.Logout.update sharedState subMsg subModel
+            Logout.update sharedState subMsg subModel
                 |> updateWith LogoutPage LogoutMsg model
 
         ( RegisterMsg subMsg, RegisterPage subModel ) ->
-            Pages.Register.update sharedState subMsg subModel
+            Register.update sharedState subMsg subModel
                 |> updateWith RegisterPage RegisterMsg model
 
         ( PasswordResetRequestMsg subMsg, PasswordResetRequestPage subModel ) ->
-            Pages.PasswordResetRequest.update sharedState subMsg subModel
+            PasswordResetRequest.update sharedState subMsg subModel
                 |> updateWith PasswordResetRequestPage PasswordResetRequestMsg model
 
         ( PasswordResetFinishMsg subMsg, PasswordResetFinishPage subModel ) ->
-            Pages.PasswordResetFinish.update sharedState subMsg subModel
+            PasswordResetFinish.update sharedState subMsg subModel
                 |> updateWith PasswordResetFinishPage PasswordResetFinishMsg model
 
         ( SettingsMsg subMsg, SettingsPage subModel ) ->
-            Pages.Settings.update sharedState subMsg subModel
+            Settings.update sharedState subMsg subModel
                 |> updateWith SettingsPage SettingsMsg model
 
         ( PasswordUpdateMsg subMsg, PasswordUpdatePage subModel ) ->
-            Pages.PasswordUpdate.update sharedState subMsg subModel
+            PasswordUpdate.update sharedState subMsg subModel
                 |> updateWith PasswordUpdatePage PasswordUpdateMsg model
 
         ( ActivateMsg subMsg, ActivatePage subModel ) ->
-            Pages.Activation.update sharedState subMsg subModel
+            Activate.update sharedState subMsg subModel
                 |> updateWith ActivatePage ActivateMsg model
 
         ( NoOp, _ ) ->
@@ -308,33 +302,33 @@ updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
 
 navigateTo : Route -> SharedState -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 navigateTo route sharedState model =
-    case Debug.log "==>Router.navigateTo" route of
+    case route of
         Home ->
-            Pages.Home.init |> initWith HomePage HomeMsg model NoUpdate
+            Home.init |> initWith HomePage HomeMsg model NoUpdate
 
         Login ->
-            Pages.Login.init |> initWith LoginPage LoginMsg model NoUpdate
+            Login.init |> initWith LoginPage LoginMsg model NoUpdate
 
         Logout ->
-            Pages.Logout.init |> initWith LogoutPage LogoutMsg model (UpdateJwtToken Nothing False)
+            Logout.init |> initWith LogoutPage LogoutMsg model (UpdateJwtToken Nothing False)
 
         Register ->
-            Pages.Register.init |> initWith RegisterPage RegisterMsg model NoUpdate
+            Register.init |> initWith RegisterPage RegisterMsg model NoUpdate
 
         PasswordResetRequest ->
-            Pages.PasswordResetRequest.init |> initWith PasswordResetRequestPage PasswordResetRequestMsg model NoUpdate
+            PasswordResetRequest.init |> initWith PasswordResetRequestPage PasswordResetRequestMsg model NoUpdate
 
         PasswordResetFinish key ->
-            Pages.PasswordResetFinish.init key |> initWith PasswordResetFinishPage PasswordResetFinishMsg model NoUpdate
+            PasswordResetFinish.init key |> initWith PasswordResetFinishPage PasswordResetFinishMsg model NoUpdate
 
         Settings ->
-            Pages.Settings.init |> initWith SettingsPage SettingsMsg model NoUpdate
+            Settings.init |> initWith SettingsPage SettingsMsg model NoUpdate
 
         PasswordUpdate ->
-            Pages.PasswordUpdate.init |> initWith PasswordUpdatePage PasswordUpdateMsg model NoUpdate
+            PasswordUpdate.init |> initWith PasswordUpdatePage PasswordUpdateMsg model NoUpdate
 
         Activate key ->
-            Pages.Activation.init key |> initWith ActivatePage ActivateMsg model NoUpdate
+            Activate.init key |> initWith ActivatePage ActivateMsg model NoUpdate
 
         NotFound ->
             ( { model | currentPage = NotFoundPage {} }
@@ -359,34 +353,34 @@ view msgMapper sharedState model =
         ( title, body ) =
             case model.currentPage of 
                 NotFoundPage pageModel ->
-                    Pages.NotFound.view pageModel |> transform sharedState NotFoundMsg model
+                    NotFound.view sharedState pageModel |> transform sharedState NotFoundMsg model
 
                 HomePage pageModel ->
-                    Pages.Home.view sharedState pageModel |> transform sharedState HomeMsg model
+                    Home.view sharedState pageModel |> transform sharedState HomeMsg model
 
                 LoginPage pageModel ->
-                    Pages.Login.view sharedState pageModel |> transform sharedState LoginMsg model
+                    Login.view sharedState pageModel |> transform sharedState LoginMsg model
 
                 LogoutPage pageModel ->
-                    Pages.Logout.view pageModel |> transform sharedState LogoutMsg model
+                    Logout.view sharedState pageModel |> transform sharedState LogoutMsg model
 
                 RegisterPage pageModel ->
-                    Pages.Register.view sharedState pageModel |> transform sharedState RegisterMsg model
+                    Register.view sharedState pageModel |> transform sharedState RegisterMsg model
 
                 PasswordResetRequestPage pageModel ->
-                    Pages.PasswordResetRequest.view pageModel |> transform sharedState PasswordResetRequestMsg model
+                    PasswordResetRequest.view sharedState pageModel |> transform sharedState PasswordResetRequestMsg model
 
                 PasswordResetFinishPage pageModel ->
-                    Pages.PasswordResetFinish.view pageModel |> transform sharedState PasswordResetFinishMsg model
+                    PasswordResetFinish.view sharedState pageModel |> transform sharedState PasswordResetFinishMsg model
 
                 SettingsPage pageModel ->
-                    Pages.Settings.view sharedState pageModel |> transform sharedState SettingsMsg model
+                    Settings.view sharedState pageModel |> transform sharedState SettingsMsg model
 
                 PasswordUpdatePage pageModel ->
-                    Pages.PasswordUpdate.view sharedState pageModel |> transform sharedState PasswordUpdateMsg model
+                    PasswordUpdate.view sharedState pageModel |> transform sharedState PasswordUpdateMsg model
 
                 ActivatePage pageModel ->
-                    Pages.Activation.view pageModel |> transform sharedState ActivateMsg model
+                    Activate.view sharedState pageModel |> transform sharedState ActivateMsg model
 
     in
     { title = "jHipster Elm Demo - " ++ title

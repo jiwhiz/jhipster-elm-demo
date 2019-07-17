@@ -13,7 +13,7 @@ type alias User =
     , email : String
     , imageUrl : Maybe String
     , activated : Bool
-    , language : String
+    , languageKey : String
     , authorities : List String
     }
 
@@ -41,6 +41,6 @@ encoder model =
         , ( "email", Encode.string model.email )
         , ( "imageUrl", maybe Encode.string model.imageUrl )
         , ( "activated", Encode.bool model.activated )
-        , ( "langKey", Encode.string model.language )
+        , ( "langKey", Encode.string model.languageKey )
         , ( "authorities", Encode.list Encode.string model.authorities )
         ]

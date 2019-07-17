@@ -1,4 +1,4 @@
-module Pages.Register exposing (..)
+module Modules.Account.Register exposing (..)
 
 import Api.Data.RegisterVM exposing(RegisterVM)
 import Api.Request.Account exposing(registerAccount)
@@ -12,13 +12,17 @@ import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
+import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import Modules.Account.I18n.Phrases as AccountPhrases
+import Modules.Account.I18n.Translator exposing(translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Typography exposing (h1)
 import Utils
 
 
@@ -31,25 +35,30 @@ type alias Values =
     , email : String
     , password : String
     , repeatPassword : String
+    , languageKey : String
     }
 
 
 type Msg 
     = NavigateTo Route
     | FormChanged Model
-    | Register String String String
+    | Register String String String String
     | RegisterResponse (WebData ())
 
 
 init : ( Model, Cmd Msg )
 init = 
-    ( Values "" "" "" "" |> Form.View.idle
+    ( Values "" "" "" "" "en" |> Form.View.idle
     , Cmd.none
     )
 
 
 update : SharedState -> Msg -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
 update sharedState msg model =
+    let
+        translate =
+            translator sharedState.language
+    in
     case msg of
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
@@ -57,12 +66,13 @@ update sharedState msg model =
         FormChanged newModel ->
             ( newModel, Cmd.none, NoUpdate )
 
-        Register username email password ->
+        Register username email password languageKey ->
             let
                 registerVM =
                     { username = Just username
                     , email = Just email
                     , password = Just password
+                    , languageKey = Just languageKey
                     }
             in
             case model.state of
@@ -80,23 +90,24 @@ update sharedState msg model =
                 errorString =
                     case err of
                         Http.BadStatus 400 ->
-                            "Wrong Password or Username!"
-
-                        Http.BadStatus 422 ->
-                            "Your email is not confirmed!"
+                            translate AccountPhrases.RegistrationFailed -- TODO display error msg from server
 
                         _ ->
-                            "Something went wrong"
+                            translate AccountPhrases.ServerError
             in
             ( { model | state = Form.View.Error errorString }
             , Cmd.none
-            , ShowToast <| Toasty.Defaults.Error "Register Error" errorString
+            , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         RegisterResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , NoUpdate
+            , ShowToast <|
+                Toasty.Defaults.Success
+                    (translate AccountPhrases.Success)
+                    (translate AccountPhrases.RegistrationSuccess)
+
             )
 
         RegisterResponse _ ->
@@ -107,13 +118,17 @@ view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Registration"
     , el 
-        [ height fill, centerX, paddingXY 10 10]
+        [ width fill, height fill, centerX, paddingXY 100 10]
         ( content sharedState model )
     )
 
 
 content : SharedState -> Model -> Element Msg
 content sharedState model =
+    let
+        translate =
+            translator sharedState.language
+    in
     column
         [ width fill
         , height fill
@@ -121,47 +136,33 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ subTitle sharedState
-        , registerFormView model
+        [ h1 [paddingXY 0 30]
+            (text <| translate AccountPhrases.RegisterTitle)
+        , UiFramework.Form.layout
+            { onChange = FormChanged
+            , action = translate AccountPhrases.RegisterButtonLabel
+            , loading = translate AccountPhrases.RegisterButtonLoading
+            , validation = Form.View.ValidateOnSubmit
+            }
+            (form sharedState)
+            model
         ]
 
 
-subTitle : SharedState -> Element Msg
-subTitle sharedState =
-    el
-        [ alignLeft
-        , paddingXY 0 10
-        , Font.size 30
-        , Font.color (rgb255 59 59 59)
-        , Font.bold
-        ]
-        (text "Registration"
-        )
-
-
-registerFormView : Model -> Element Msg
-registerFormView model =
-    UiFramework.Form.layout
-        { onChange = FormChanged
-        , action = "Register"
-        , loading = "Sending..."
-        , validation = Form.View.ValidateOnSubmit
-        }
-        form
-        model
-
-
-form : Form Values Msg
-form =
+form : SharedState -> Form Values Msg
+form sharedState =
     let
+        translate =
+            translator sharedState.language
+
         usernameField =
             Form.textField
                 { parser = Ok
                 , value = .username
                 , update = \value values -> { values | username = value }
                 , attributes =
-                    { label = "Username"
-                    , placeholder = "Your username"
+                    { label = translate AccountPhrases.UsernameLabel
+                    , placeholder = translate AccountPhrases.UsernamePlaceholder
                     }
                 }
 
@@ -171,8 +172,8 @@ form =
                 , value = .email
                 , update = \value values -> { values | email = value }
                 , attributes =
-                    { label = "Email"
-                    , placeholder = "Your email"
+                    { label = translate AccountPhrases.EmailLabel
+                    , placeholder = translate AccountPhrases.EmailPlaceholder
                     }
                 }
 
@@ -182,8 +183,8 @@ form =
                 , value = .password
                 , update = \value values -> { values | password = value }
                 , attributes =
-                    { label = "New password"
-                    , placeholder = "New password"
+                    { label = translate AccountPhrases.NewPasswordLabel
+                    , placeholder = translate AccountPhrases.NewPasswordPlaceholder
                     }
                 }
 
@@ -197,17 +198,32 @@ form =
                                     Ok ()
 
                                 else
-                                    Err "The passwords do not match"
+                                    Err <| translate AccountPhrases.PasswordNotMatch
                         , value = .repeatPassword
                         , update =
                             \newValue values_ ->
                                 { values_ | repeatPassword = newValue }
                         , attributes =
-                            { label = "New password confirmation"
-                            , placeholder = "Conform the new password"
+                            { label = translate AccountPhrases.ConfirmPasswordLabel
+                            , placeholder = translate AccountPhrases.ConfirmPasswordPlaceholder
                             }
                         }
                 )
+
+        languageField =
+            Form.selectField
+                { parser = Ok
+                , value = .languageKey
+                , update = \value values -> { values | languageKey = value }
+                , attributes =
+                    { label = translate AccountPhrases.LanguageLabel
+                    , placeholder = " - select language -"
+                    , options = 
+                        List.map
+                            (\lang -> (I18n.languageCode lang, I18n.languageName lang))
+                            I18n.supportLanguages
+                    }
+                }
     in
     Form.succeed Register
         |> Form.append usernameField
@@ -217,5 +233,6 @@ form =
                 |> Form.append passwordField
                 |> Form.append repeatPasswordField
             )
+        |> Form.append languageField
 
 
