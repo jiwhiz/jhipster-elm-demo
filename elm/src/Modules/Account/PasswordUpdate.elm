@@ -122,9 +122,6 @@ view sharedState model =
 content : SharedState -> Model -> Element Msg
 content sharedState model =
     let
-        user =
-            el [ Font.bold ] (text (SharedState.displayUsername sharedState))
-
         translate =
             translator sharedState.language
     in
