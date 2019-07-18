@@ -1,7 +1,7 @@
-module Modules.Account.Settings exposing (..)
+module Modules.Account.Settings exposing (Model, Msg(..), Values, content, form, init, update, view)
 
-import Api.Data.Settings exposing(Settings)
-import Api.Request.Account exposing(updateSettings)
+import Api.Data.Settings exposing (Settings)
+import Api.Request.Account exposing (updateSettings)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Background as Background
@@ -14,18 +14,19 @@ import Http
 import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import Modules.Account.I18n.Phrases as AccountPhrases
-import Modules.Account.I18n.Translator exposing(translator)
+import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
-import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Padding
 import UiFramework.Typography exposing (h1)
 import Utils
+import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     Form.View.Model Values
 
 
@@ -37,7 +38,7 @@ type alias Values =
     }
 
 
-type Msg 
+type Msg
     = NavigateTo Route
     | FormChanged Model
     | SaveSettings String String String String
@@ -45,7 +46,7 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( Values "" "" "" "" |> Form.View.idle
     , Cmd.none
     )
@@ -103,7 +104,7 @@ update sharedState msg model =
         SaveSettingsResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , ShowToast <| 
+            , ShowToast <|
                 Toasty.Defaults.Success
                     (translate AccountPhrases.Success)
                     (translate AccountPhrases.SaveSuccess)
@@ -117,8 +118,8 @@ view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Settings"
     , el
-        [ width fill, height fill, centerX, paddingXY 100 10]
-        ( content sharedState model )
+        [ height fill, width fill, paddingXY 10 10 ]
+        (content sharedState model)
     )
 
 
@@ -135,7 +136,7 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ h1 [paddingXY 0 30]
+        [ h1 [ paddingXY 0 30 ]
             (text <| translate <| AccountPhrases.SettingsTitle (SharedState.getUsername sharedState))
         , UiFramework.Form.layout
             { onChange = FormChanged
@@ -146,6 +147,7 @@ content sharedState model =
             (form sharedState)
             model
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 form : SharedState -> Form Values Msg
@@ -195,9 +197,9 @@ form sharedState =
                 , attributes =
                     { label = translate AccountPhrases.LanguageLabel
                     , placeholder = " - select language -"
-                    , options = 
+                    , options =
                         List.map
-                            (\lang -> (I18n.languageCode lang, I18n.languageName lang))
+                            (\lang -> ( I18n.languageCode lang, I18n.languageName lang ))
                             I18n.supportLanguages
                     }
                 }

@@ -21,8 +21,9 @@ import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework.Alert as Alert
 import UiFramework.Form
+import UiFramework.Padding
 import UiFramework.Types exposing (Role(..), ScreenSize(..))
-import UiFramework.Typography
+import UiFramework.Typography exposing (h1)
 import Utils
 import Validate exposing (Validator, ifBlank, validate)
 
@@ -122,7 +123,8 @@ view sharedState model =
         [ height fill
         , width fill
         , centerX
-        , paddingXY 100 10 ]
+        , paddingXY 100 10
+        ]
         (case sharedState.user of
             Just user ->
                 el
@@ -151,15 +153,8 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         , Font.alignLeft
-        , Font.size 16
         ]
-        [ el
-            [ paddingXY 0 30
-            , Font.alignLeft
-            , Font.size 28
-            , Font.color (rgb255 59 59 59)
-            , Font.light
-            ]
+        [ h1 [ paddingXY 0 30 ]
             (text <| translate LoginPhrases.LoginTitle)
         , UiFramework.Form.layout
             { onChange = FormChanged
@@ -185,6 +180,7 @@ content sharedState model =
                     }
                 ]
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 form : SharedState -> Form Values Msg

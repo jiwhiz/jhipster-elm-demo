@@ -1,8 +1,8 @@
-module Modules.Account.Register exposing (..)
+module Modules.Account.Register exposing (Model, Msg(..), Values, content, form, init, update, view)
 
-import Api.Data.RegisterVM exposing(RegisterVM)
-import Api.Request.Account exposing(registerAccount)
-import Api.Request.Auth exposing(authenticationPost)
+import Api.Data.RegisterVM exposing (RegisterVM)
+import Api.Request.Account exposing (registerAccount)
+import Api.Request.Auth exposing (authenticationPost)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Background as Background
@@ -15,18 +15,19 @@ import Http
 import I18n
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import Modules.Account.I18n.Phrases as AccountPhrases
-import Modules.Account.I18n.Translator exposing(translator)
+import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Padding
 import UiFramework.Typography exposing (h1)
 import Utils
+import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     Form.View.Model Values
 
 
@@ -39,7 +40,7 @@ type alias Values =
     }
 
 
-type Msg 
+type Msg
     = NavigateTo Route
     | FormChanged Model
     | Register String String String String
@@ -47,7 +48,7 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( Values "" "" "" "" "en" |> Form.View.idle
     , Cmd.none
     )
@@ -90,8 +91,9 @@ update sharedState msg model =
                 errorString =
                     case err of
                         Http.BadStatus 400 ->
-                            translate AccountPhrases.RegistrationFailed -- TODO display error msg from server
+                            translate AccountPhrases.RegistrationFailed
 
+                        -- TODO display error msg from server
                         _ ->
                             translate AccountPhrases.ServerError
             in
@@ -107,7 +109,6 @@ update sharedState msg model =
                 Toasty.Defaults.Success
                     (translate AccountPhrases.Success)
                     (translate AccountPhrases.RegistrationSuccess)
-
             )
 
         RegisterResponse _ ->
@@ -117,9 +118,9 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Registration"
-    , el 
-        [ width fill, height fill, centerX, paddingXY 100 10]
-        ( content sharedState model )
+    , el
+        [ width fill, height fill, centerX, paddingXY 100 10 ]
+        (content sharedState model)
     )
 
 
@@ -136,7 +137,7 @@ content sharedState model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ h1 [paddingXY 0 30]
+        [ h1 [ paddingXY 0 30 ]
             (text <| translate AccountPhrases.RegisterTitle)
         , UiFramework.Form.layout
             { onChange = FormChanged
@@ -147,6 +148,7 @@ content sharedState model =
             (form sharedState)
             model
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 form : SharedState -> Form Values Msg
@@ -218,9 +220,9 @@ form sharedState =
                 , attributes =
                     { label = translate AccountPhrases.LanguageLabel
                     , placeholder = " - select language -"
-                    , options = 
+                    , options =
                         List.map
-                            (\lang -> (I18n.languageCode lang, I18n.languageName lang))
+                            (\lang -> ( I18n.languageCode lang, I18n.languageName lang ))
                             I18n.supportLanguages
                     }
                 }
@@ -228,11 +230,9 @@ form sharedState =
     Form.succeed Register
         |> Form.append usernameField
         |> Form.append emailField
-        |> Form.append 
+        |> Form.append
             (Form.succeed (\password _ -> password)
                 |> Form.append passwordField
                 |> Form.append repeatPasswordField
             )
         |> Form.append languageField
-
-

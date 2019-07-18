@@ -1,6 +1,6 @@
-module Modules.Account.PasswordUpdate exposing (..)
+module Modules.Account.PasswordUpdate exposing (Model, Msg(..), Values, content, form, init, update, view)
 
-import Api.Request.Account exposing(updatePassword)
+import Api.Request.Account exposing (updatePassword)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Background as Background
@@ -11,19 +11,20 @@ import Form exposing (Form)
 import Form.View
 import Http
 import Modules.Account.I18n.Phrases as AccountPhrases
-import Modules.Account.I18n.Translator exposing(translator)
+import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import Validate exposing (Validator, ifBlank, validate)
 import UiFramework.Form
+import UiFramework.Padding
 import UiFramework.Toasty
 import UiFramework.Typography exposing (h1)
 import Utils
+import Validate exposing (Validator, ifBlank, validate)
 
 
-type alias Model = 
+type alias Model =
     Form.View.Model Values
 
 
@@ -34,7 +35,7 @@ type alias Values =
     }
 
 
-type Msg 
+type Msg
     = NavigateTo Route
     | FormChanged Model
     | ChangePassword String String
@@ -42,7 +43,7 @@ type Msg
 
 
 init : ( Model, Cmd Msg )
-init = 
+init =
     ( Values "" "" "" |> Form.View.idle
     , Cmd.none
     )
@@ -99,7 +100,7 @@ update sharedState msg model =
         ChangePasswordResponse (RemoteData.Success ()) ->
             ( { model | state = Form.View.Idle }
             , Cmd.none
-            , ShowToast <| 
+            , ShowToast <|
                 Toasty.Defaults.Success
                     (translate AccountPhrases.Success)
                     (translate AccountPhrases.UpdateSuccess)
@@ -112,9 +113,9 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Change Password"
-    , el 
-        [ width fill, height fill, centerX, paddingXY 10 10]
-        ( content sharedState model )
+    , el
+        [ height fill, width fill, paddingXY 10 10 ]
+        (content sharedState model)
     )
 
 
@@ -142,6 +143,7 @@ content sharedState model =
             (form sharedState)
             model
         ]
+        |> UiFramework.Padding.responsive sharedState
 
 
 form : SharedState -> Form Values Msg
@@ -196,9 +198,8 @@ form sharedState =
     in
     Form.succeed ChangePassword
         |> Form.append currentPasswordField
-        |> Form.append 
+        |> Form.append
             (Form.succeed (\password _ -> password)
                 |> Form.append passwordField
                 |> Form.append repeatPasswordField
             )
-
