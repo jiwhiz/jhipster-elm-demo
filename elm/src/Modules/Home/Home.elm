@@ -78,10 +78,10 @@ content =
         [ uiColumn
             [ width <| fillPortion 3
             , height fill
-            , paddingXY 15 25
+            , paddingXY 20 10
             , spacing 20
             ]
-            [ h1 [] <| tt HomePhrases.Title
+            [ h1 [ paddingXY 0 30 ] <| tt HomePhrases.Title
             , textLead [] <| tt HomePhrases.Subtitle
             , accountInfo
             , uiParagraph
