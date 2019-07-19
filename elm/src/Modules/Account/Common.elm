@@ -11,8 +11,6 @@ import UiFramework.Colors as Colors
 type alias Context =
     { language : Language
     , translate : AccountPhrases.Phrase -> String
-
-    -- , username : String
     }
 
 
@@ -24,8 +22,6 @@ toContext : SharedState -> UiContextual Context
 toContext sharedState =
     { language = sharedState.language
     , translate = translator sharedState.language
-
-    -- , username = SharedState.getUsername sharedState
     , device = sharedState.device
     , themeColor = Colors.defaultThemeColor
     , parentRole = Nothing
