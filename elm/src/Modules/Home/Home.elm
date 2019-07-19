@@ -89,7 +89,7 @@ content =
                     (\context ->
                         link []
                             { url = "https://github.com/jhipster/generator-jhipster"
-                            , label = text "Github"
+                            , label = text " Github!"
                             }
                     )
                 ]

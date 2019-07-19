@@ -15,7 +15,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph)
+import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Form
 import UiFramework.Padding
@@ -172,6 +172,7 @@ loginForm model =
             uiParagraph
                 [ Font.alignLeft ]
                 [ tt LoginPhrases.NoAccountYet
+                , uiText (\_ -> " ")
                 , Alert.link
                     { onPress = Just <| NavigateTo Register
                     , label = tt LoginPhrases.RegisterNewAccount
