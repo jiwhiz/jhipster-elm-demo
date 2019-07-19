@@ -1,12 +1,11 @@
 module Modules.Home.Home exposing (Model, Msg(..), accountInfo, init, update, view)
 
-import Api.Data.User as User exposing (User)
+import Api.Data.User exposing (User)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
 import Element.Font as Font
 import Html
 import Html.Attributes
-import I18n
 import Modules.Home.I18n.Phrases as HomePhrases
 import Modules.Home.I18n.Translator exposing (translator)
 import Routes exposing (Route(..), routeToUrlString)
@@ -14,7 +13,6 @@ import SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Colors as Colors
-import UiFramework.Padding
 import UiFramework.Types exposing (Role(..), ScreenSize(..))
 import UiFramework.Typography exposing (h1, textLead)
 

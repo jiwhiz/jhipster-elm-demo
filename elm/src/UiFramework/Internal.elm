@@ -1,7 +1,6 @@
 module UiFramework.Internal exposing (UiContextual, WithContext(..), flatMap, fromElement, node, toElement, uiColumn, uiNone, uiParagraph, uiRow, uiText)
 
 import Element exposing (Attribute, Color, Device, Element)
-import Element.Lazy exposing (lazy)
 import UiFramework.Types exposing (Role(..))
 
 

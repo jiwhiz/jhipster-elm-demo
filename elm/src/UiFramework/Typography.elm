@@ -1,6 +1,7 @@
 module UiFramework.Typography exposing (h1, h2, h3, h4, h5, h6, textExtraSmall, textLead, textSmall)
 
-{-| 
+{-|
+
 
 # Functions
 
@@ -8,11 +9,11 @@ module UiFramework.Typography exposing (h1, h2, h3, h4, h5, h6, textExtraSmall, 
 
 -}
 
-import Element exposing (alignLeft, paddingEach, text)
+import Element exposing (alignLeft, paddingEach)
 import Element.Font as Font
 import Element.Region as Region
 import UiFramework.Internal as Internal
-import UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+import UiFramework.Types exposing (Role(..), ScreenSize(..))
 
 
 type alias UiElement context msg =
@@ -99,11 +100,11 @@ heading level attributes child =
         (\context ->
             Element.el
                 ([ Region.heading <| headingLevel level
-                , Font.size <| fontSize level
-                , paddingEach { top = 0, right = 0, bottom = 0, left = 0 }
-                , alignLeft
-                , Font.bold
-                ]
+                 , Font.size <| fontSize level
+                 , paddingEach { top = 0, right = 0, bottom = 0, left = 0 }
+                 , alignLeft
+                 , Font.bold
+                 ]
                     ++ attributes
                 )
                 (Internal.toElement context child)

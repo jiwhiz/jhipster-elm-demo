@@ -17,10 +17,10 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Element.Region as Region
 import UiFramework.Colors exposing (..)
 import UiFramework.Internal as Internal
 import UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+
 
 type alias UiElement context msg =
     Internal.WithContext (Internal.UiContextual context) msg
@@ -85,6 +85,7 @@ simple role child =
         |> view
 
 
+
 -- Rendering Alert
 
 
@@ -94,11 +95,12 @@ view (Alert options) =
         (\context ->
             el (viewAttributes context options) <|
                 Internal.toElement
-                    { context | parentRole = Just options.role } options.child
+                    { context | parentRole = Just options.role }
+                    options.child
         )
 
 
-viewAttributes : (Internal.UiContextual context) -> Options context mag -> List (Attribute msg)
+viewAttributes : Internal.UiContextual context -> Options context mag -> List (Attribute msg)
 viewAttributes context options =
     let
         backgroundColor =
@@ -126,7 +128,10 @@ viewAttributes context options =
     ]
 
 
+
 -- Alert Link
+
+
 link :
     { onPress : Maybe msg
     , label : UiElement context msg
@@ -136,7 +141,8 @@ link { onPress, label } =
     Internal.fromElement
         (\context ->
             let
-                role = context.parentRole |> Maybe.withDefault Primary
+                role =
+                    context.parentRole |> Maybe.withDefault Primary
 
                 fontColor =
                     alertLinkFontColor context.themeColor role

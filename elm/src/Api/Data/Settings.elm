@@ -1,9 +1,9 @@
 module Api.Data.Settings exposing (Settings, decoder, encoder)
 
 import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (optional, required)
+import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-import Json.Encode.Extra exposing (maybe)
+
 
 type alias Settings =
     { username : String
@@ -12,6 +12,7 @@ type alias Settings =
     , email : String
     , languageKey : String
     }
+
 
 decoder : Decoder Settings
 decoder =

@@ -1,9 +1,8 @@
 module Modules.Account.I18n.Phrases exposing (Phrase(..))
 
-import I18n exposing (Language(..))
 
-
-type Phrase
+type
+    Phrase
     -- Activate page
     = ActivateTitle
     | UserAccountCannotActivate
@@ -12,20 +11,20 @@ type Phrase
     | Activating
     | CanLoginNow
     | UseRegistrationToSignup
-    -- Registration page
+      -- Registration page
     | RegisterTitle
     | RegisterButtonLabel
     | RegisterButtonLoading
     | RegistrationFailed
     | RegistrationSuccess
-    -- Settings page
+      -- Settings page
     | SettingsTitle String
     | SaveButtonLabel
     | SaveButtonLoading
     | CannotSaveSettings
     | EmailAlreadyInUse
     | SaveSuccess
-    -- Reset Password page
+      -- Reset Password page
     | ResetPasswordTitle
     | ResetPasswordInfo
     | ResetButtonLabel
@@ -35,11 +34,11 @@ type Phrase
     | MissingResetKey
     | CannotReset
     | ResetSuccess
-    -- Update Password page
+      -- Update Password page
     | UpdatePasswordTitle String
     | CannotUpdate
     | UpdateSuccess
-    -- form fields
+      -- form fields
     | UsernameLabel
     | UsernamePlaceholder
     | EmailLabel
@@ -55,10 +54,9 @@ type Phrase
     | LastnameLabel
     | LastnamePlaceholder
     | LanguageLabel
-    -- form validation error messages
+      -- form validation error messages
     | PasswordNotMatch
-    -- General messages
+      -- General messages
     | Success
     | Error
     | ServerError
-

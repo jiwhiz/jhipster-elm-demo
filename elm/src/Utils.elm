@@ -1,29 +1,28 @@
 module Utils exposing
-    ( flip
+    ( delay
+    , flip
     , perform
     , split
     , tupleExtend
     , tupleMapThree
     , unzipTripple
-    , delay
     )
 
-import Browser.Navigation exposing (pushUrl)
-import Http
 import List
-import Task
-import Time
 import Process
+import Task
 
 
 perform : msg -> Cmd msg
 perform =
     Task.perform identity << Task.succeed
 
+
 delay : Float -> msg -> Cmd msg
 delay time msg =
     Process.sleep time
         |> Task.perform (\_ -> msg)
+
 
 split : Int -> List a -> List (List a)
 split i list =

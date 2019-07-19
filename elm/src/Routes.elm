@@ -1,7 +1,7 @@
 module Routes exposing (Route(..), fromUrl, routeToUrlString)
 
 import Url
-import Url.Parser exposing (Parser, parse, string, map, oneOf, query, s, top, (</>), (<?>))
+import Url.Parser exposing ((</>), Parser, map, oneOf, parse, query, s, string, top)
 import Url.Parser.Query as Query
 
 
@@ -18,13 +18,13 @@ type Route
     | NotFound
 
 
-fromUrl : Url.Url -> Route 
+fromUrl : Url.Url -> Route
 fromUrl url =
-    parse routeParser url 
-        |> Maybe.withDefault NotFound 
+    parse routeParser url
+        |> Maybe.withDefault NotFound
 
 
-routeParser : Parser (Route -> a) a 
+routeParser : Parser (Route -> a) a
 routeParser =
     oneOf
         [ map Home top
@@ -39,9 +39,12 @@ routeParser =
         ]
 
 
+
 {-
-This is the util function to translate Route data into url string.
+   This is the util function to translate Route data into url string.
 -}
+
+
 routeToUrlString : Route -> String
 routeToUrlString route =
     let
@@ -63,13 +66,14 @@ routeToUrlString route =
                     [ "reset", "request" ]
 
                 PasswordResetFinish key ->
-                    [ "reset", "finish" ] -- TODO: do we need to put key in url?
+                    [ "reset", "finish" ]
 
+                -- TODO: do we need to put key in url?
                 Settings ->
                     [ "account", "settings" ]
 
                 PasswordUpdate ->
-                    [ "account", "password"]
+                    [ "account", "password" ]
 
                 Activate key ->
                     [ "activate" ]

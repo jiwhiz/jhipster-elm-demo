@@ -19,7 +19,6 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Element.Region as Region
 import UiFramework.Colors exposing (..)
 import UiFramework.Icon as Icon
 import UiFramework.Internal as Internal
@@ -30,9 +29,8 @@ type alias UiElement context msg =
     Internal.WithContext (Internal.UiContextual context) msg
 
 
-{-| Button type -}
-
-
+{-| Button type
+-}
 type Button context msg
     = Button (Options msg)
 
@@ -148,7 +146,7 @@ view (Button options) =
         )
 
 
-viewAttributes : (Internal.UiContextual context) -> Options mag -> List (Attribute msg)
+viewAttributes : Internal.UiContextual context -> Options mag -> List (Attribute msg)
 viewAttributes context options =
     let
         backgroundColor =

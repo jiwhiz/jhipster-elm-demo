@@ -1,21 +1,20 @@
-module Api.Request.Account exposing (..)
+module Api.Request.Account exposing (activateAccount, getCurrentAccount, registerAccount, requestResetPassword, resetPassword, updatePassword, updateSettings)
 
-import Api.Data.User as User exposing(User)
-import Api.Data.KeyAndPasswordVM as KeyAndPasswordVM exposing(KeyAndPasswordVM)
-import Api.Data.PasswordUpdateVM as PasswordUpdateVM exposing(PasswordUpdateVM)
-import Api.Data.RegisterVM as RegisterVM exposing(RegisterVM)
-import Api.Data.Settings as Settings exposing(Settings)
+import Api.Data.KeyAndPasswordVM as KeyAndPasswordVM exposing (KeyAndPasswordVM)
+import Api.Data.PasswordUpdateVM as PasswordUpdateVM exposing (PasswordUpdateVM)
+import Api.Data.RegisterVM as RegisterVM exposing (RegisterVM)
+import Api.Data.Settings as Settings exposing (Settings)
+import Api.Data.User as User exposing (User)
 import Api.Endpoint as Endpoint exposing (unwrap)
 import Api.Helper exposing (get, getExpectNothing, postExpectNothing)
 import Http
-import Json.Encode as Encode
 import RemoteData exposing (RemoteData(..), WebData)
 
 
 getCurrentAccount : Maybe String -> (WebData User -> msg) -> Cmd msg
 getCurrentAccount token toMsg =
     get
-        token 
+        token
         (unwrap Endpoint.account)
         toMsg
         User.decoder
@@ -36,7 +35,6 @@ activateAccount key toMsg =
         Nothing
         (unwrap Endpoint.activate ++ "?key=" ++ key)
         toMsg
-
 
 
 requestResetPassword : String -> (WebData () -> msg) -> Cmd msg
@@ -73,5 +71,3 @@ updatePassword token passwordUpdateVM toMsg =
         (unwrap Endpoint.changePassword)
         (Http.jsonBody <| PasswordUpdateVM.encoder passwordUpdateVM)
         toMsg
-
-
