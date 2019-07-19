@@ -1,7 +1,6 @@
-module UiFramework.Internal exposing (..)
+module UiFramework.Internal exposing (UiContextual, WithContext(..), flatMap, fromElement, node, toElement, uiColumn, uiNone, uiParagraph, uiRow, uiText)
 
 import Element exposing (Attribute, Color, Device, Element)
-import Element.Lazy exposing (lazy)
 import UiFramework.Types exposing (Role(..))
 
 
@@ -29,7 +28,7 @@ toElement context wc =
             f context <| List.map (toElement context) children
 
         Leaf f ->
-            lazy f context
+            f context
 
 
 fromElement : (context -> Element msg) -> WithContext context msg
@@ -43,6 +42,7 @@ flatMap f =
         (\context ->
             toElement context (f context)
         )
+
 
 {-| Custom node.
 -}

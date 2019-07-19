@@ -18,7 +18,7 @@ decoder =
     Decode.succeed LoginVM
         |> optional "username" (Decode.nullable Decode.string) Nothing
         |> optional "password" (Decode.nullable Decode.string) Nothing
-        |> optional "rememberMe" (Decode.bool) False
+        |> optional "rememberMe" Decode.bool False
 
 
 encoder : LoginVM -> Encode.Value

@@ -4,28 +4,22 @@ import Api.Data.Settings exposing (Settings)
 import Api.Request.Account exposing (updateSettings)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
-import Element.Input as Input
 import Form exposing (Form)
 import Form.View
 import Http
 import I18n exposing (Language(..))
-import Modules.Account.Common exposing(Context, UiElement, toContext, tt)
-import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import LocalStorage exposing (Event(..))
+import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
-import UiFramework exposing (WithContext, UiContextual, toElement, fromElement, uiText, uiRow, uiColumn, uiParagraph, flatMap)
+import UiFramework exposing (flatMap, toElement, uiColumn)
 import UiFramework.Form
 import UiFramework.Padding
 import UiFramework.Typography exposing (h1)
-import Utils
-import Validate exposing (Validator, ifBlank, validate)
 
 
 type alias Model =
@@ -132,8 +126,9 @@ content username model =
         , paddingXY 20 10
         , spacing 20
         ]
-        [ h1 [ paddingXY 0 30 ]
-            <| tt <| AccountPhrases.SettingsTitle username
+        [ h1 [ paddingXY 0 30 ] <|
+            tt <|
+                AccountPhrases.SettingsTitle username
         , flatMap
             (\context ->
                 UiFramework.Form.layout

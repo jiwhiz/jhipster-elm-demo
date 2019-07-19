@@ -1,15 +1,10 @@
 module Modules.Login.Logout exposing (Model, Msg(..), content, init, update, view)
 
-import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
 import LocalStorage exposing (jwtAuthenticationTokenKey)
-import Modules.Login.Common exposing (Context, UiElement, toContext, tt)
+import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
-import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (toElement, uiColumn)
 import UiFramework.Alert as Alert

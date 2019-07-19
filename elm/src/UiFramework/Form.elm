@@ -1,4 +1,4 @@
-module UiFramework.Form exposing (layout, setState, asStateIn)
+module UiFramework.Form exposing (asStateIn, layout, setState)
 
 import Element exposing (..)
 import Element.Background as Background
@@ -11,7 +11,6 @@ import Form.Error as Error exposing (Error)
 import Form.View
     exposing
         ( CheckboxFieldConfig
-        , CustomConfig
         , FormConfig
         , FormListConfig
         , FormListItemConfig
@@ -29,14 +28,17 @@ import Html.Attributes
 import UiFramework.Button as Button
 import UiFramework.Colors exposing (..)
 import UiFramework.Internal as Internal
-import UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+import UiFramework.Types exposing (Role(..))
 
 
 type alias UiElement context msg =
     Internal.WithContext (Internal.UiContextual context) msg
 
 
+
 {- Util functions for Form.View.Model record setter when used in nexted page model -}
+
+
 setState : Form.View.State -> Form.View.Model values -> Form.View.Model values
 setState state model =
     { model | state = state }
@@ -49,6 +51,7 @@ asStateIn model state =
 
 
 -- Copied from https://github.com/hecrj/composable-form/blob/master/examples/src/Form/View/Ui.elm
+
 
 layout : ViewConfig values msg -> Form values msg -> Model values -> UiElement context msg
 layout =
@@ -158,6 +161,7 @@ textareaField { onChange, onBlur, disabled, value, error, showError, attributes 
                 }
         )
 
+
 numberField : NumberFieldConfig msg -> UiElement context msg
 numberField { onChange, onBlur, disabled, value, error, showError, attributes } =
     Internal.fromElement
@@ -211,7 +215,8 @@ checkboxField { onChange, onBlur, value, disabled, error, showError, attributes 
                 , checked = value
                 , label =
                     labelRight (showError && error /= Nothing)
-                        attributes context.themeColor
+                        attributes
+                        context.themeColor
                 }
         )
 
@@ -232,7 +237,7 @@ radioField { onChange, onBlur, disabled, value, error, showError, attributes } =
                         (\( val, name ) ->
                             Input.option val (text name)
                         )
-                        attributes.options 
+                        attributes.options
                 }
         )
 
@@ -317,7 +322,7 @@ placeholder attributes =
         )
 
 
-labelCenterY : 
+labelCenterY :
     (List (Attribute msg) -> Element msg -> Input.Label msg)
     -> Bool
     -> { r | label : String }
@@ -419,5 +424,3 @@ withHtmlAttribute :
 withHtmlAttribute toAttribute maybeValue attrs =
     Maybe.map (toAttribute >> htmlAttribute >> (\attr -> attr :: attrs)) maybeValue
         |> Maybe.withDefault attrs
-
-

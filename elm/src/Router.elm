@@ -1,42 +1,40 @@
-module Router exposing(..)
+module Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..), brand, footer, header, init, initWith, isCurrentRoute, isUnderAccount, logo, navigateTo, project, subscriptions, transform, update, updateWith, version, view, viewLayout)
 
 import Api.Data.User as User
 import Api.Request.Account exposing (getCurrentAccount)
 import Browser
 import Browser.Events as Events
-import Browser.Navigation exposing (Key)
+import Browser.Navigation
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Region as Region
 import FontAwesome.Solid
 import FontAwesome.Styles
-import Html exposing (Html)
-import Html.Events
+import Html
 import I18n
 import Json.Decode as Json
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import Modules.Account.Activate as Activate
-import Modules.Home.Home as Home
-import Modules.Login.Login as Login
-import Modules.Login.Logout as Logout
-import Modules.Error.NotFound as NotFound
 import Modules.Account.PasswordResetFinish as PasswordResetFinish
 import Modules.Account.PasswordResetRequest as PasswordResetRequest
 import Modules.Account.PasswordUpdate as PasswordUpdate
 import Modules.Account.Register as Register
 import Modules.Account.Settings as Settings
+import Modules.Error.NotFound as NotFound
+import Modules.Home.Home as Home
+import Modules.Login.Login as Login
+import Modules.Login.Logout as Logout
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), fromUrl, routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Toasty
 import Toasty.Defaults
-import Url exposing (Url)
 import UiFramework.Colors as Colors
 import UiFramework.Navbar as Navbar
 import UiFramework.Toasty
+import Url exposing (Url)
 import Utils
 
 
@@ -92,7 +90,7 @@ type Msg
     | NoOp
 
 
-init : Url  -> ( Model, Cmd Msg )
+init : Url -> ( Model, Cmd Msg )
 init url =
     let
         currentRoute =
@@ -109,10 +107,11 @@ init url =
     )
 
 
-subscriptions : SharedState -> Model -> Sub Msg 
+subscriptions : SharedState -> Model -> Sub Msg
 subscriptions sharedState model =
     if model.dropdownMenuState /= AllClosed then
         Events.onClick (Json.succeed CloseDropdown)
+
     else
         Sub.none
 
@@ -147,16 +146,14 @@ update sharedState msg model =
             , NoUpdate
             )
 
-
         ( GetAccountResponse (RemoteData.Success user), _ ) ->
             ( model
             , Cmd.none
             , UpdateUser user
             )
 
-        ( GetAccountResponse _, _ )->
+        ( GetAccountResponse _, _ ) ->
             ( model, Cmd.none, NoUpdate )
-
 
         ( ToggleMenu, _ ) ->
             ( { model | toggleMenuState = not model.toggleMenuState }
@@ -169,10 +166,10 @@ update sharedState msg model =
                 dropdownMenuState =
                     if model.dropdownMenuState == LanguageOpen then
                         AllClosed
+
                     else
                         LanguageOpen
             in
-            
             ( { model | dropdownMenuState = dropdownMenuState }
             , Cmd.none
             , NoUpdate
@@ -183,10 +180,10 @@ update sharedState msg model =
                 dropdownMenuState =
                     if model.dropdownMenuState == AccountOpen then
                         AllClosed
+
                     else
                         AccountOpen
             in
-            
             ( { model | dropdownMenuState = dropdownMenuState }
             , Cmd.none
             , NoUpdate
@@ -253,11 +250,12 @@ update sharedState msg model =
             ( model, Cmd.none, NoUpdate )
 
 
-updateWith : (subModel -> Page)
-        -> (subMsg -> Msg)
-        -> Model
-        -> ( subModel, Cmd subMsg, SharedStateUpdate )
-        -> ( Model, Cmd Msg, SharedStateUpdate )
+updateWith :
+    (subModel -> Page)
+    -> (subMsg -> Msg)
+    -> Model
+    -> ( subModel, Cmd subMsg, SharedStateUpdate )
+    -> ( Model, Cmd Msg, SharedStateUpdate )
 updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
     let
         ( newModel, newCmd, newSharedState ) =
@@ -278,6 +276,7 @@ updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
                                 [ getCurrentAccount maybeJwt GetAccountResponse
                                 , if rememberMe then
                                     LocalStorage.save jwtAuthenticationTokenKey token
+
                                   else
                                     Cmd.none
                                 ]
@@ -344,13 +343,15 @@ initWith toPage toMsg model sharedStateUpdate ( subModel, subCmd ) =
     )
 
 
+
 -- VIEW --
+
 
 view : (Msg -> msg) -> SharedState -> Model -> Browser.Document msg
 view msgMapper sharedState model =
     let
         ( title, body ) =
-            case model.currentPage of 
+            case model.currentPage of
                 NotFoundPage pageModel ->
                     NotFound.view sharedState pageModel |> transform sharedState NotFoundMsg model
 
@@ -380,24 +381,23 @@ view msgMapper sharedState model =
 
                 ActivatePage pageModel ->
                     Activate.view sharedState pageModel |> transform sharedState ActivateMsg model
-
     in
     { title = "jHipster Elm Demo - " ++ title
     , body = List.singleton (Html.map msgMapper body)
     }
 
 
-transform : SharedState -> ( a -> Msg ) -> Model -> ( String, Element a) -> ( String, Html.Html Msg )
+transform : SharedState -> (a -> Msg) -> Model -> ( String, Element a ) -> ( String, Html.Html Msg )
 transform sharedState toMsg model =
-    Tuple.mapSecond ( Element.map toMsg ) >> 
-    Tuple.mapSecond ( viewLayout sharedState model ) 
+    Tuple.mapSecond (Element.map toMsg)
+        >> Tuple.mapSecond (viewLayout sharedState model)
 
 
 viewLayout : SharedState -> Model -> Element Msg -> Html.Html Msg
 viewLayout sharedState model content =
-    Element.layout 
+    Element.layout
         []
-        ( column 
+        (column
             [ width fill
             , height fill
             , Background.color Colors.white
@@ -412,7 +412,7 @@ viewLayout sharedState model content =
                 , Background.color Colors.gray100
                 , Border.color Colors.black
                 ]
-                ( el
+                (el
                     [ height fill
                     , width fill
                     , Background.color <| Colors.getColor "#fafafa"
@@ -427,6 +427,7 @@ viewLayout sharedState model content =
             ]
         )
 
+
 header : SharedState -> Model -> Element Msg
 header sharedState model =
     Navbar.default ToggleMenu
@@ -435,7 +436,9 @@ header sharedState model =
         |> Navbar.withMenuItems
             [ Navbar.linkItem (NavigateTo Home)
                 |> Navbar.withMenuIcon FontAwesome.Solid.home
-                |> Navbar.withMenuTitle "Home"  -- TODO translate
+                |> Navbar.withMenuTitle "Home"
+
+            -- TODO translate
             , Navbar.dropdown ToggleLanguageDropdown LanguageOpen
                 |> Navbar.withDropdownMenuItems
                     [ Navbar.dropdownMenuItem (SelectLanguage I18n.English)
@@ -450,7 +453,7 @@ header sharedState model =
                 |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
             , Navbar.dropdown ToggleAccountDropdown AccountOpen
                 |> Navbar.withDropdownMenuItems
-                    ( case sharedState.user of
+                    (case sharedState.user of
                         Just user ->
                             [ Navbar.dropdownMenuItem (NavigateTo Settings)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.wrench
@@ -484,13 +487,14 @@ header sharedState model =
 
 
 footer : Element Msg
-footer = 
+footer =
     paragraph [ paddingXY 20 10, Background.color (rgb255 248 248 248), Font.size 10 ]
         [ text "This is footer." ]
 
+
 brand : Element Msg
 brand =
-    row [] [ logo, row [centerY] [project, version ]]
+    row [] [ logo, row [ centerY ] [ project, version ] ]
 
 
 logo : Element Msg
@@ -506,18 +510,17 @@ project =
         , Font.size 24
         , Font.bold
         ]
-        ( text "JelmHipster" )
+        (text "JelmHipster")
 
 
 version : Element Msg
 version =
     el
-        [ paddingEach { top = 0, right = 0, bottom = 0, left = 10}
+        [ paddingEach { top = 0, right = 0, bottom = 0, left = 10 }
         , alignBottom
         , Font.size 10
         ]
-        ( text "0.0.1-SNAPSHOT" )
-
+        (text "0.0.1-SNAPSHOT")
 
 
 isCurrentRoute : Model -> Routes.Route -> Bool

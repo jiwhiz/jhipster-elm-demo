@@ -1,34 +1,27 @@
 module Modules.Login.Login exposing (Model, Msg(..), Values, init, update, view)
 
 import Api.Data.JWTToken exposing (JWT)
-import Api.Data.LoginVM exposing (LoginVM)
 import Api.Request.Auth exposing (authenticationPost)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Events as Events
 import Element.Font as Font
-import Element.Input as Input
 import Form exposing (Form)
 import Form.View
-import Http
 import I18n exposing (Language(..))
-import Modules.Login.Common exposing (Context, UiElement, toContext, tt)
+import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
+import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Form
 import UiFramework.Padding
 import UiFramework.Types exposing (Role(..), ScreenSize(..))
 import UiFramework.Typography exposing (h1)
 import Utils
-import Validate exposing (Validator, ifBlank, validate)
 
 
 type alias Model =
@@ -179,13 +172,13 @@ loginForm model =
             uiParagraph
                 [ Font.alignLeft ]
                 [ tt LoginPhrases.NoAccountYet
+                , uiText (\_ -> " ")
                 , Alert.link
                     { onPress = Just <| NavigateTo Register
                     , label = tt LoginPhrases.RegisterNewAccount
                     }
                 ]
         ]
-
 
 
 form : Language -> Form Values Msg

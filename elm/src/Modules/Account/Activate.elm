@@ -3,29 +3,19 @@ module Modules.Account.Activate exposing (Model, Msg(..), init, update, view)
 import Api.Request.Account exposing (activateAccount)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
-import Element.Input as Input
-import Form exposing (Form)
-import Form.View
 import Http
-import Modules.Account.Common exposing(Context, UiElement, toContext, tt)
+import Modules.Account.Common exposing(toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
 import RemoteData
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (WithContext, UiContextual, toElement, fromElement, uiText, uiRow, uiColumn, uiParagraph, flatMap)
+import UiFramework exposing ( toElement, uiText, uiColumn, uiParagraph)
 import UiFramework.Alert as Alert
-import UiFramework.Form
 import UiFramework.Padding
-import UiFramework.Toasty
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
-import Utils
-import Validate exposing (Validator, ifBlank, validate)
 
 
 type alias Model =

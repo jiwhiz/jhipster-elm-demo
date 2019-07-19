@@ -1,6 +1,4 @@
-port module LocalStorage exposing (Event(..), clear, request, save, watchChanges, jwtAuthenticationTokenKey)
-
--- Copied from https://github.com/MattCheely/elm-port-examples
+port module LocalStorage exposing (Event(..), clear, jwtAuthenticationTokenKey, request, save, watchChanges)
 
 {-| This module provides a basic interface to the localStorage API. It supports
 requesting, saving, and clearing values for specific keys. It also provides a
@@ -19,15 +17,19 @@ state be updated. This serves two purposes:
 
 -}
 
-import Dict exposing (Dict)
+-- Copied from https://github.com/MattCheely/elm-port-examples
+
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode exposing (Value)
 
 
+
 ---- CONSTANTS ----
+
 
 jwtAuthenticationTokenKey =
     "jhi-authenticationToken"
+
 
 
 -- Outbound API

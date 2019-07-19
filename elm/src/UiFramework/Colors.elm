@@ -1,7 +1,7 @@
-module UiFramework.Colors exposing (..)
+module UiFramework.Colors exposing (alertBackgroundColor, alertBorderColor, alertFontColor, alertLinkFontColor, black, blue, calculateWeight, colorLevel, contrastTextColor, cyan, darken, defaultAlertBackgroundColor, defaultAlertBorderColor, defaultAlertFontColor, defaultAlertLinkFontColor, defaultTextDark, defaultTextLight, defaultThemeColor, fromHex, fromHex8, getColor, gray, gray100, gray200, gray300, gray400, gray500, gray600, gray700, gray800, gray900, green, hex2ToInt, hexToInt, hsla, indigo, lighten, limit, mixChannel, orange, pink, purple, red, teal, toHsla, weightedMix, white, yellow)
 
 import Bitwise exposing (shiftLeftBy)
-import Element exposing (Color, rgb255, rgba, toRgb, fromRgb)
+import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import UiFramework.Types exposing (Role(..))
 
 
@@ -93,7 +93,7 @@ gray =
     gray600
 
 
-{-| Copy from Bootstrap 4.x 
+{-| Copy from Bootstrap 4.x
 // Customize the light and dark text colors for use in our YIQ color contrast function.
 $yiq-text-dark: $gray-900 !default;
 $yiq-text-light: $white !default;
@@ -106,7 +106,7 @@ defaultTextLight =
     white
 
 
-{-| Copy from Bootstrap 4.x 
+{-| Copy from Bootstrap 4.x
 // Color contrast
 @function color-yiq($color, $dark: $yiq-text-dark, $light: $yiq-text-light) {
 $r: red($color);
@@ -176,59 +176,61 @@ defaultThemeColor role =
 
 defaultAlertBackgroundColor : Role -> Color
 defaultAlertBackgroundColor =
-    defaultThemeColor >> (colorLevel -10)
+    defaultThemeColor >> colorLevel -10
 
 
 defaultAlertBorderColor : Role -> Color
 defaultAlertBorderColor =
-    defaultThemeColor >> (colorLevel -9)
+    defaultThemeColor >> colorLevel -9
 
 
 defaultAlertFontColor : Role -> Color
 defaultAlertFontColor =
-    defaultThemeColor >> (colorLevel 6)
+    defaultThemeColor >> colorLevel 6
 
 
 defaultAlertLinkFontColor : Role -> Color
 defaultAlertLinkFontColor =
-    defaultThemeColor >> (darken 0.3)
+    defaultThemeColor >> darken 0.3
 
 
 colorLevel : Int -> Color -> Color
 colorLevel level color =
     let
-        baseColor = 
+        baseColor =
             if level > 0 then
                 black
+
             else
                 white
     in
     weightedMix baseColor color <| 0.08 * toFloat (abs level)
 
 
-
 alertBackgroundColor : (Role -> Color) -> Role -> Color
 alertBackgroundColor themeColor =
-    themeColor >> (colorLevel -10)
+    themeColor >> colorLevel -10
 
 
 alertBorderColor : (Role -> Color) -> Role -> Color
 alertBorderColor themeColor =
-    themeColor >> (colorLevel -9)
+    themeColor >> colorLevel -9
 
 
 alertFontColor : (Role -> Color) -> Role -> Color
 alertFontColor themeColor =
-    themeColor >> (colorLevel 6)
+    themeColor >> colorLevel 6
 
 
 alertLinkFontColor : (Role -> Color) -> Role -> Color
 alertLinkFontColor themeColor =
-    themeColor >> (darken 0.3)
+    themeColor >> darken 0.3
+
 
 
 -- Util functions
 -- Copied from https://github.com/lucamug/elm-style-framework
+
 
 getColor : String -> Color
 getColor hexStr =
@@ -342,8 +344,10 @@ hexToInt char =
             Nothing
 
 
+
 -- Color manipulation util functions
 -- Copied from https://github.com/noahzgordon/elm-color-extra
+
 
 weightedMix : Color -> Color -> Float -> Color
 weightedMix color1 color2 weight =
@@ -483,11 +487,11 @@ toHsla color =
         rgba =
             toRgb color
 
-        (r, g) =
-            (rgba.red, rgba.green)
+        ( r, g ) =
+            ( rgba.red, rgba.green )
 
-        (b, a) =
-            (rgba.blue, rgba.alpha)
+        ( b, a ) =
+            ( rgba.blue, rgba.alpha )
 
         minColor =
             min r (min g b)
@@ -536,4 +540,3 @@ toHsla color =
     , lightness = l
     , alpha = a
     }
-

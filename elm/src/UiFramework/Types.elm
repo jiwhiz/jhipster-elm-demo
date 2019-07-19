@@ -1,4 +1,5 @@
-module UiFramework.Types exposing(..)
+module UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+
 
 type Role
     = Primary
@@ -24,7 +25,7 @@ getFontSize size =
     case size of
         XS ->
             12
-        
+
         SM ->
             14
 

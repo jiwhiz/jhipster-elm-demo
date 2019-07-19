@@ -1,19 +1,17 @@
-module Main exposing (..)
+module Main exposing (AppState(..), Flags, Model, Msg(..), WindowSize, getReady, getUserLanguage, handleStorageEvent, handleWindowSize, init, logError, main, subscriptions, update, updateJwtToken, updateRouter, updateTime, updateTimeZone, view, withErrorLog)
 
-import Api.Data.User as User exposing(User)
+import Api.Data.User exposing (User)
 import Api.Request.Account exposing (getCurrentAccount)
 import Browser
 import Browser.Events
 import Browser.Navigation
 import Element exposing (Device, classifyDevice)
 import Html
-import I18n exposing(Language(..), languageFromCode)
+import I18n exposing (Language(..), languageFromCode)
 import Json.Decode as Decode
-import Json.Encode as Encode
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
-import Routes
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Time exposing (Posix, Zone)
@@ -70,8 +68,8 @@ type AppState
 init : Flags -> Url.Url -> Browser.Navigation.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
-        maybeJwtToken = 
-            (Decode.decodeValue Decode.string flags.jwtToken |> Result.toMaybe)
+        maybeJwtToken =
+            Decode.decodeValue Decode.string flags.jwtToken |> Result.toMaybe
     in
     ( { appState =
             NotReady
@@ -162,7 +160,7 @@ update msg model =
             ( model, Cmd.none )
 
 
-getReady : Maybe User ->  Model -> ( Model, Cmd Msg )
+getReady : Maybe User -> Model -> ( Model, Cmd Msg )
 getReady maybeUser model =
     case model.appState of
         NotReady time zone device ->
@@ -186,8 +184,9 @@ getReady maybeUser model =
 
         Ready sharedState routerModel ->
             ( model, Cmd.none )
-                |> withErrorLog "Response from getAccount when app state is already Ready!" -- Is this an app logic error?
+                |> withErrorLog "Response from getAccount when app state is already Ready!"
 
+        -- Is this an app logic error?
         FailedToInitialize ->
             ( model, Cmd.none )
 
@@ -291,8 +290,9 @@ updateJwtToken model value =
                     )
 
                 Just jwtToken ->
-                    ( model, Cmd.none ) -- In what situation jwt token got updated when app state is Ready? Other window tab logged out and logged in again? Need more tests and investigation!
+                    ( model, Cmd.none )
 
+        -- In what situation jwt token got updated when app state is Ready? Other window tab logged out and logged in again? Need more tests and investigation!
         _ ->
             ( model, Cmd.none )
 

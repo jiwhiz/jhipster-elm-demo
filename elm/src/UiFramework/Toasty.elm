@@ -1,4 +1,4 @@
-module UiFramework.Toasty exposing (..)
+module UiFramework.Toasty exposing (view)
 
 import Element exposing (Element, html)
 import Html exposing (..)

@@ -1,7 +1,7 @@
-module SharedState exposing (SharedState, SharedStateUpdate(..), update, getUsername)
+module SharedState exposing (SharedState, SharedStateUpdate(..), getUsername, update)
 
 import Api.Data.Role exposing (Role(..))
-import Api.Data.User as User exposing (User)
+import Api.Data.User exposing (User)
 import Browser.Navigation
 import Element exposing (Device)
 import I18n exposing (Language(..), languageFromCode)
@@ -42,16 +42,17 @@ update sharedState sharedStateUpdate =
             { sharedState | timezone = Just zone }
 
         UpdateLanguage language ->
-            { sharedState | language = language}
+            { sharedState | language = language }
 
         UpdateDevice device ->
             { sharedState | device = device }
 
         UpdateUser user ->
             -- Received for a positive login
-            { sharedState 
-            | user = Just user
-            , language = languageFromCode user.languageKey }
+            { sharedState
+                | user = Just user
+                , language = languageFromCode user.languageKey
+            }
 
         UpdateJwtToken maybeJwt rememberMe ->
             case maybeJwt of

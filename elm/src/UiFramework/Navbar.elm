@@ -1,13 +1,10 @@
-module UiFramework.Navbar exposing
-    ( .. )
+module UiFramework.Navbar exposing (BackgroundColor(..), Dropdown(..), DropdownMenuItem(..), DropdownOptions, LinkItemOptions, MenuItem(..), Navbar(..), NavbarOptions, NavbarState, default, dropdown, dropdownMenuItem, linkItem, onClick, view, viewCollapsedMenuList, viewDropdownItem, viewDropdownMenu, viewLinkItem, viewMenuItem, viewMenubarList, withBackground, withBackgroundColor, withBrand, withDropdownMenuIcon, withDropdownMenuItems, withDropdownMenuTitle, withExtraAttrs, withMenuIcon, withMenuItems, withMenuTitle)
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Region as Region
-import FontAwesome.Icon
-import Html exposing (Html)
 import Html.Events
 import Json.Decode as Json
 import UiFramework.Colors as Colors
@@ -73,38 +70,38 @@ type alias DropdownOptions msg state =
 
 withBrand : Element msg -> Navbar msg state -> Navbar msg state
 withBrand brand (Navbar options) =
-    Navbar {  options | brand = Just brand }
+    Navbar { options | brand = Just brand }
 
 
 withBackground : Role -> Navbar msg state -> Navbar msg state
-withBackground role  (Navbar options)=
-    Navbar {  options | backgroundColor = Roled role }
+withBackground role (Navbar options) =
+    Navbar { options | backgroundColor = Roled role }
 
 
 withBackgroundColor : Color -> Navbar msg state -> Navbar msg state
-withBackgroundColor color  (Navbar options)=
-    Navbar {  options | backgroundColor = Custom color }
+withBackgroundColor color (Navbar options) =
+    Navbar { options | backgroundColor = Custom color }
 
 
-withMenuItems : List (MenuItem msg state)-> Navbar msg state -> Navbar msg state
-withMenuItems items (Navbar options)=
-    Navbar {  options | items = items }
+withMenuItems : List (MenuItem msg state) -> Navbar msg state -> Navbar msg state
+withMenuItems items (Navbar options) =
+    Navbar { options | items = items }
 
 
-withExtraAttrs : List (Attribute msg) ->  Navbar msg state -> Navbar msg state
+withExtraAttrs : List (Attribute msg) -> Navbar msg state -> Navbar msg state
 withExtraAttrs attributes (Navbar options) =
     Navbar { options | attributes = attributes }
 
 
 default : msg -> Navbar msg state
 default msg =
-    Navbar 
+    Navbar
         { toggleMenuMsg = msg
         , brand = Nothing
         , backgroundColor = Roled Light
         , items = []
         , attributes = []
-    }
+        }
 
 
 linkItem : msg -> MenuItem msg state
@@ -121,8 +118,10 @@ withMenuIcon icon item =
     case item of
         LinkItem options ->
             LinkItem { options | icon = Just icon }
+
         DropdownItem (Dropdown options) ->
             DropdownItem <| Dropdown { options | icon = Just icon }
+
         CustomItem ->
             item
 
@@ -132,8 +131,10 @@ withMenuTitle title item =
     case item of
         LinkItem options ->
             LinkItem { options | title = title }
+
         DropdownItem (Dropdown options) ->
             DropdownItem <| Dropdown { options | title = title }
+
         CustomItem ->
             item
 
@@ -165,7 +166,7 @@ dropdownMenuItem msg =
 
 withDropdownMenuIcon : Icon.Icon -> DropdownMenuItem msg -> DropdownMenuItem msg
 withDropdownMenuIcon icon (DropdownMenuItem options) =
-    DropdownMenuItem { options | icon = Just icon}
+    DropdownMenuItem { options | icon = Just icon }
 
 
 withDropdownMenuTitle : String -> DropdownMenuItem msg -> DropdownMenuItem msg
@@ -173,7 +174,9 @@ withDropdownMenuTitle title (DropdownMenuItem options) =
     DropdownMenuItem { options | title = title }
 
 
+
 -- Render Navbar
+
 
 view : NavbarState state -> Navbar msg state -> Element msg
 view state (Navbar options) =
@@ -182,20 +185,22 @@ view state (Navbar options) =
             case options.backgroundColor of
                 Roled role ->
                     Colors.defaultThemeColor role
+
                 Custom color ->
                     color
+
                 Class cssStr ->
                     Colors.getColor cssStr
 
-        fontColor = 
+        fontColor =
             Colors.contrastTextColor backgroundColor Colors.defaultTextDark Colors.defaultTextLight
-    
+
         headerAttrs =
             [ width fill
             , paddingXY 20 16
             , Border.solid
             , Border.color Colors.gray300
-            , Border.widthEach {bottom=1, top=0, left=0, right=0}
+            , Border.widthEach { bottom = 1, top = 0, left = 0, right = 0 }
             , Background.color backgroundColor
             , Font.color fontColor
             ]
@@ -205,39 +210,48 @@ view state (Navbar options) =
 
         navButton : msg -> Element msg
         navButton toggleMenuMsg =
-            el 
+            el
                 [ onClick toggleMenuMsg
                 , alignRight
                 , Border.color fontColor
                 , Border.solid
                 , Border.width 1
                 , Border.rounded 3
-                , Border.shadow { offset = (0, 0), size = 0, blur = 4, color = rgba 0 0 0 0.2} 
-                ] <|
-                    column [ spacing 4, padding 10 ]
-                        [ iconBar, iconBar, iconBar ]
+                , Border.shadow { offset = ( 0, 0 ), size = 0, blur = 4, color = rgba 0 0 0 0.2 }
+                ]
+            <|
+                column [ spacing 4, padding 10 ]
+                    [ iconBar, iconBar, iconBar ]
 
         iconBar =
-            el 
+            el
                 [ width <| px 22
                 , height <| px 2
                 , Background.color fontColor
                 , Border.rounded 1
-                ] none
+                ]
+                none
     in
     case state.deviceClass of
         Phone ->
-            column headerAttrs
-                <| [ row [ width fill, paddingEach { top = 10, right = 20, bottom = 10, left = 10 } ] 
-                        [ brand, navButton options.toggleMenuMsg ] ] ++ 
-                    (if state.toggleMenuState then [ viewCollapsedMenuList state options.items ] else [])
+            column headerAttrs <|
+                [ row [ width fill, paddingEach { top = 10, right = 20, bottom = 10, left = 10 } ]
+                    [ brand, navButton options.toggleMenuMsg ]
+                ]
+                    ++ (if state.toggleMenuState then
+                            [ viewCollapsedMenuList state options.items ]
+
+                        else
+                            []
+                       )
+
         _ ->
             row headerAttrs [ brand, viewMenubarList state options.items ]
 
 
 viewCollapsedMenuList : NavbarState state -> List (MenuItem msg state) -> Element msg
 viewCollapsedMenuList state items =
-    column 
+    column
         [ Region.navigation
         , width fill
         , paddingXY 0 10
@@ -246,20 +260,23 @@ viewCollapsedMenuList state items =
         , Font.size 14
         , Font.alignLeft
         ]
-        <| List.map (viewMenuItem state) items
+    <|
+        List.map (viewMenuItem state) items
 
 
 viewMenubarList : NavbarState state -> List (MenuItem msg state) -> Element msg
 viewMenubarList state items =
-    row [ Region.navigation
-        , paddingEach { top = 20, right = 30, bottom = 20, left = 100}
+    row
+        [ Region.navigation
+        , paddingEach { top = 20, right = 30, bottom = 20, left = 100 }
         , spacing 15
         , alignRight
         , Font.size 16
         , Font.center
         , Font.medium
         ]
-        <| List.map (viewMenuItem state) items
+    <|
+        List.map (viewMenuItem state) items
 
 
 viewMenuItem : NavbarState state -> MenuItem msg state -> Element msg
@@ -279,17 +296,16 @@ viewLinkItem : LinkItemOptions msg -> Element msg
 viewLinkItem options =
     el
         [ onClick options.triggerMsg
-        , paddingEach { top = 8, right = 12, bottom = 8, left = 12}
+        , paddingEach { top = 8, right = 12, bottom = 8, left = 12 }
         , width fill
         , pointer
-        ] 
-        (
-            case options.icon of
-                Nothing ->
-                    text options.title
+        ]
+        (case options.icon of
+            Nothing ->
+                text options.title
 
-                Just icon ->
-                    row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text options.title) ]
+            Just icon ->
+                row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text options.title) ]
         )
 
 
@@ -297,28 +313,28 @@ viewDropdownItem : NavbarState state -> DropdownOptions msg state -> Element msg
 viewDropdownItem state options =
     el
         [ onClick options.toggleDropdownMsg
-        , paddingEach { top = 8, right = 12, bottom = 8, left = 12}
+        , paddingEach { top = 8, right = 12, bottom = 8, left = 12 }
         , pointer
         , below <|
-            if (state.dropdownState == options.openState) then
+            if state.dropdownState == options.openState then
                 viewDropdownMenu options.items
+
             else
                 none
         ]
-        (
-            case options.icon of
-                Nothing ->
-                    text <| options.title ++ " ▾"
+        (case options.icon of
+            Nothing ->
+                text <| options.title ++ " ▾"
 
-                Just icon ->
-                    row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text <| options.title ++ " ▾") ]
+            Just icon ->
+                row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text <| options.title ++ " ▾") ]
         )
 
 
 viewDropdownMenu : List (DropdownMenuItem msg) -> Element msg
 viewDropdownMenu items =
-    el [ alignRight ] <| 
-        column 
+    el [ alignRight ] <|
+        column
             [ paddingXY 10 10
             , spacing 0
             , Background.color Colors.white
@@ -328,11 +344,12 @@ viewDropdownMenu items =
             , Border.color (rgba 0 0 0 0.15)
             , Border.solid
             , Border.width 1
-            , Border.shadow { offset = (0, 5), size = 0, blur = 10, color = rgba 0 0 0 0.2}
+            , Border.shadow { offset = ( 0, 5 ), size = 0, blur = 10, color = rgba 0 0 0 0.2 }
+
             -- , Element.explain Debug.todo
             ]
-            ( List.map 
-                (\(DropdownMenuItem options) -> 
+            (List.map
+                (\(DropdownMenuItem options) ->
                     viewLinkItem options
                 )
                 items
@@ -343,12 +360,10 @@ onClick : msg -> Attribute msg
 onClick message =
     Html.Events.custom
         "click"
-        ( Json.succeed 
+        (Json.succeed
             { message = message
             , stopPropagation = True
             , preventDefault = False
             }
         )
-    |> htmlAttribute
-
-
+        |> htmlAttribute

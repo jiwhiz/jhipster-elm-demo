@@ -1,14 +1,12 @@
 module Modules.Error.NotFound exposing (Model, Msg(..), content, init, subscriptions, update, view)
 
 import Element exposing (..)
-import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font
-import Modules.Error.Common exposing (Context, UiElement, toContext, tt)
+import Modules.Error.Common exposing (toContext, tt)
 import Modules.Error.I18n.Phrases as ErrorPhrases
 import Modules.Error.I18n.Translator exposing (translator)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
-import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
+import UiFramework exposing (toElement, uiColumn)
 import UiFramework.Typography exposing (h1)
 
 
