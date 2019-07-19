@@ -109,7 +109,6 @@ content =
                 )
             ]
         ]
-        |> UiFramework.Padding.responsive
 
 
 accountInfo =
