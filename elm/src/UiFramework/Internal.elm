@@ -1,4 +1,4 @@
-module UiFramework.Internal exposing (UiContextual, WithContext(..), flatMap, fromElement, node, toElement, uiColumn, uiNone, uiParagraph, uiRow, uiText)
+module UiFramework.Internal exposing (UiContextual, WithContext, flatMap, fromElement, node, toElement, uiColumn, uiNone, uiParagraph, uiRow, uiText)
 
 import Element exposing (Attribute, Color, Device, Element)
 import UiFramework.Types exposing (Role(..))
@@ -63,7 +63,7 @@ uiText f =
     Leaf <| \context -> Element.text <| f context
 
 
-uiRow : List (Attribute msg) -> List (WithContext c msg) -> WithContext c msg
+uiRow : List (Attribute msg) -> List (WithContext (UiContextual c) msg) -> WithContext (UiContextual c) msg
 uiRow attrs =
     node
         (\context ->
