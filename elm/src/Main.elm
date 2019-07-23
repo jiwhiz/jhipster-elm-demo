@@ -325,10 +325,6 @@ withErrorLog err updateTuple =
 
 logError : String -> Cmd Msg
 logError error =
-    -- let
-    --     log =
-    --         Debug.log "ERROR" error
-    -- in
     Cmd.none
 
 
