@@ -20,9 +20,10 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import UiFramework.Colors exposing (..)
+import UiFramework.Configuration exposing (..)
 import UiFramework.Icon as Icon
 import UiFramework.Internal as Internal
-import UiFramework.Types exposing (Role(..), ScreenSize(..))
+import UiFramework.Types exposing (Role(..), Size(..))
 
 
 type alias UiElement context msg =
@@ -40,7 +41,7 @@ type alias Options msg =
     , outlined : Bool
     , block : Bool
     , disabled : Bool
-    , size : ScreenSize
+    , size : Size
     , onPress : Maybe msg
     , icon : Maybe Icon.Icon
     , label : String
@@ -70,12 +71,12 @@ withDisabled (Button options) =
 
 withLarge : Button context msg -> Button context msg
 withLarge (Button options) =
-    Button { options | size = LG }
+    Button { options | size = SizeLarge }
 
 
 withSmall : Button context msg -> Button context msg
 withSmall (Button options) =
-    Button { options | size = SM }
+    Button { options | size = SizeSmall }
 
 
 withMessage : Maybe msg -> Button context msg -> Button context msg
@@ -104,7 +105,7 @@ defaultOptions =
     , outlined = False
     , block = False
     , disabled = False
-    , size = MD
+    , size = SizeDefault
     , onPress = Nothing
     , icon = Nothing
     , label = ""
@@ -149,25 +150,16 @@ view (Button options) =
 viewAttributes : Internal.UiContextual context -> Options mag -> List (Attribute msg)
 viewAttributes context options =
     let
-        backgroundColor =
-            context.themeColor options.role
-
-        borderColor =
-            context.themeColor options.role
-
-        fontColor =
-            contrastTextColor backgroundColor defaultTextDark defaultTextLight
-
-        fontSize =
-            16
+        config =
+            context.themeConfig.buttonConfig
     in
-    [ paddingXY 16 10
+    [ paddingXY (config.paddingX options.size) (config.paddingY options.size)
     , Font.center
-    , Font.size 16
-    , Font.color fontColor
-    , Border.rounded 4
-    , Border.width 1
+    , Font.size <| config.fontSize options.size
+    , Font.color <| config.fontColor options.role
+    , Border.rounded <| config.borderRadius options.size
+    , Border.width <| config.borderWidth options.size
     , Border.solid
-    , Border.color borderColor
-    , Background.color backgroundColor
+    , Border.color <| config.borderColor options.role
+    , Background.color <| config.backgroundColor options.role
     ]

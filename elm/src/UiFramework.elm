@@ -27,6 +27,11 @@ flatMap =
     Internal.flatMap
 
 
+uiNone : WithContext c msg
+uiNone =
+    Internal.uiNone
+
+
 {-| Text node.
 -}
 uiText : (UiContextual c -> String) -> WithContext c msg

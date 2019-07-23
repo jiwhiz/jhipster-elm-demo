@@ -1,109 +1,8 @@
-module UiFramework.Colors exposing (alertBackgroundColor, alertBorderColor, alertFontColor, alertLinkFontColor, black, blue, calculateWeight, colorLevel, contrastTextColor, cyan, darken, defaultAlertBackgroundColor, defaultAlertBorderColor, defaultAlertFontColor, defaultAlertLinkFontColor, defaultTextDark, defaultTextLight, defaultThemeColor, fromHex, fromHex8, getColor, gray, gray100, gray200, gray300, gray400, gray500, gray600, gray700, gray800, gray900, green, hex2ToInt, hexToInt, hsla, indigo, lighten, limit, mixChannel, orange, pink, purple, red, teal, toHsla, weightedMix, white, yellow)
+module UiFramework.Colors exposing (..)
 
 import Bitwise exposing (shiftLeftBy)
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import UiFramework.Types exposing (Role(..))
-
-
-white =
-    getColor "#fff"
-
-
-gray100 =
-    getColor "#f8f9fa"
-
-
-gray200 =
-    getColor "#e9ecef"
-
-
-gray300 =
-    getColor "#dee2e6"
-
-
-gray400 =
-    getColor "#ced4da"
-
-
-gray500 =
-    getColor "#adb5bd"
-
-
-gray600 =
-    getColor "#6c757d"
-
-
-gray700 =
-    getColor "#495057"
-
-
-gray800 =
-    getColor "#343a40"
-
-
-gray900 =
-    getColor "#212529"
-
-
-black =
-    getColor "#000"
-
-
-blue =
-    getColor "#007bff"
-
-
-indigo =
-    getColor "#6610f2"
-
-
-purple =
-    getColor "#6f42c1"
-
-
-pink =
-    getColor "#e83e8c"
-
-
-red =
-    getColor "#dc3545"
-
-
-orange =
-    getColor "#fd7e14"
-
-
-yellow =
-    getColor "#ffc107"
-
-
-green =
-    getColor "#28a745"
-
-
-teal =
-    getColor "#20c997"
-
-
-cyan =
-    getColor "#17a2b8"
-
-
-gray =
-    gray600
-
-
-{-| Copy from Bootstrap 4.x
-// Customize the light and dark text colors for use in our YIQ color contrast function.
-$yiq-text-dark: $gray-900 !default;
-$yiq-text-light: $white !default;
--}
-defaultTextDark =
-    gray900
-
-
-defaultTextLight =
-    white
 
 
 {-| Copy from Bootstrap 4.x
@@ -136,96 +35,31 @@ contrastTextColor backgroundColor darkColor lightColor =
         lightColor
 
 
-{-| Copy from Bootstrap 4.x
-$primary: $blue !default;
-$secondary: $gray-600 !default;
-$success: $green !default;
-$info: $cyan !default;
-$warning: $yellow !default;
-$danger: $red !default;
-$light: $gray-100 !default;
-$dark: $gray-800 !default;
--}
-defaultThemeColor : Role -> Color
-defaultThemeColor role =
-    case role of
-        Primary ->
-            blue
-
-        Secondary ->
-            gray600
-
-        Success ->
-            green
-
-        Info ->
-            cyan
-
-        Warning ->
-            yellow
-
-        Danger ->
-            red
-
-        Light ->
-            gray100
-
-        Dark ->
-            gray800
-
-
-defaultAlertBackgroundColor : Role -> Color
-defaultAlertBackgroundColor =
-    defaultThemeColor >> colorLevel -10
-
-
-defaultAlertBorderColor : Role -> Color
-defaultAlertBorderColor =
-    defaultThemeColor >> colorLevel -9
-
-
-defaultAlertFontColor : Role -> Color
-defaultAlertFontColor =
-    defaultThemeColor >> colorLevel 6
-
-
-defaultAlertLinkFontColor : Role -> Color
-defaultAlertLinkFontColor =
-    defaultThemeColor >> darken 0.3
-
-
 colorLevel : Int -> Color -> Color
 colorLevel level color =
     let
         baseColor =
             if level > 0 then
-                black
+                getColor "#000"
 
             else
-                white
+                getColor "#fff"
     in
     weightedMix baseColor color <| 0.08 * toFloat (abs level)
 
 
-alertBackgroundColor : (Role -> Color) -> Role -> Color
-alertBackgroundColor themeColor =
-    themeColor >> colorLevel -10
-
-
-alertBorderColor : (Role -> Color) -> Role -> Color
-alertBorderColor themeColor =
-    themeColor >> colorLevel -9
-
-
-alertFontColor : (Role -> Color) -> Role -> Color
-alertFontColor themeColor =
-    themeColor >> colorLevel 6
-
-
-alertLinkFontColor : (Role -> Color) -> Role -> Color
-alertLinkFontColor themeColor =
-    themeColor >> darken 0.3
-
+alterColor : Color -> Float -> Color
+alterColor color alpha =
+    let
+        rgba =
+            toRgb color
+    in
+    fromRgb
+        { red = rgba.red
+        , green = rgba.green
+        , blue = rgba.blue
+        , alpha = alpha
+        }
 
 
 -- Util functions

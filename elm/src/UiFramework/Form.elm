@@ -93,7 +93,7 @@ form { onSubmit, action, loading, state, fields } =
         formError =
             case state of
                 Error error ->
-                    Internal.fromElement (\context -> el [ Font.color (context.themeColor Danger) ] (text error))
+                    Internal.fromElement (\context -> el [ Font.color (context.themeConfig.themeColor Danger) ] (text error))
 
                 _ ->
                     Internal.uiNone
@@ -118,12 +118,12 @@ inputField input { onChange, onBlur, disabled, value, error, showError, attribut
         (\context ->
             input
                 ([]
-                    |> withCommonAttrs showError error disabled onBlur context.themeColor
+                    |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
                 , text = value
                 , placeholder = placeholder attributes
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 }
         )
 
@@ -134,12 +134,12 @@ passwordField { onChange, onBlur, disabled, value, error, showError, attributes 
         (\context ->
             Input.currentPassword
                 ([]
-                    |> withCommonAttrs showError error disabled onBlur context.themeColor
+                    |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
                 , text = value
                 , placeholder = placeholder attributes
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 , show = False
                 }
         )
@@ -151,12 +151,12 @@ textareaField { onChange, onBlur, disabled, value, error, showError, attributes 
         (\context ->
             Input.multiline
                 ([ height shrink ]
-                    |> withCommonAttrs showError error disabled onBlur context.themeColor
+                    |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
                 , text = value
                 , placeholder = placeholder attributes
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 , spellcheck = True
                 }
         )
@@ -172,12 +172,12 @@ numberField { onChange, onBlur, disabled, value, error, showError, attributes } 
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.step) (Just attributes.step)
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.max) attributes.max
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.min) attributes.min
-                    |> withCommonAttrs showError error disabled onBlur context.themeColor
+                    |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = fromString String.toFloat value >> onChange
                 , text = value |> Maybe.map String.fromFloat |> Maybe.withDefault ""
                 , placeholder = placeholder attributes
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 }
         )
 
@@ -192,12 +192,12 @@ rangeField { onChange, onBlur, disabled, value, error, showError, attributes } =
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.step) (Just attributes.step)
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.max) attributes.max
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.min) attributes.min
-                    |> withCommonAttrs showError error disabled onBlur context.themeColor
+                    |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = fromString String.toFloat value >> onChange
                 , text = value |> Maybe.map String.fromFloat |> Maybe.withDefault ""
                 , placeholder = Nothing
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 }
         )
 
@@ -208,7 +208,7 @@ checkboxField { onChange, onBlur, value, disabled, error, showError, attributes 
         (\context ->
             Input.checkbox
                 ([ paddingXY 0 8 ]
-                    |> withCommonAttrs showError error False onBlur context.themeColor
+                    |> withCommonAttrs showError error False onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
                 , icon = Input.defaultCheckbox
@@ -216,7 +216,7 @@ checkboxField { onChange, onBlur, value, disabled, error, showError, attributes 
                 , label =
                     labelRight (showError && error /= Nothing)
                         attributes
-                        context.themeColor
+                        context.themeConfig.themeColor
                 }
         )
 
@@ -227,11 +227,11 @@ radioField { onChange, onBlur, disabled, value, error, showError, attributes } =
         (\context ->
             Input.radio
                 ([ spacing 10, paddingXY 0 8 ]
-                    |> withCommonAttrs showError error False onBlur context.themeColor
+                    |> withCommonAttrs showError error False onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
                 , selected = Just value
-                , label = labelAbove (showError && error /= Nothing) attributes context.themeColor
+                , label = labelAbove (showError && error /= Nothing) attributes context.themeConfig.themeColor
                 , options =
                     List.map
                         (\( val, name ) ->
@@ -275,8 +275,8 @@ section title fields =
             (el
                 [ moveUp 14
                 , moveRight 10
-                , Background.color black
-                , Font.color white
+                , Background.color (getColor "#000")
+                , Font.color (getColor "#fff")
                 , padding 6
                 , width shrink
                 ]
@@ -315,7 +315,7 @@ placeholder attributes =
     Just
         (Input.placeholder []
             (el
-                [ Font.color gray
+                [ Font.color (getColor "#6c757d")
                 ]
                 (text attributes.placeholder)
             )
@@ -394,7 +394,7 @@ withCommonAttrs showError error disabled onBlur themeColor attrs =
                 )
             )
         |> whenJust onBlur Events.onLoseFocus
-        |> when disabled (Background.color gray)
+        |> when disabled (Background.color <| getColor "#6c757d")
 
 
 when : Bool -> Attribute msg -> List (Attribute msg) -> List (Attribute msg)

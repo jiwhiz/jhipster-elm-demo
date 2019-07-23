@@ -7,8 +7,8 @@ import Browser.Events as Events
 import Browser.Navigation
 import Element exposing (..)
 import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font
+import FontAwesome.Brands
 import FontAwesome.Solid
 import FontAwesome.Styles
 import Html
@@ -31,9 +31,12 @@ import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Toasty
 import Toasty.Defaults
+import UiFramework exposing (toElement)
 import UiFramework.Colors as Colors
+import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
 import UiFramework.Navbar as Navbar
 import UiFramework.Toasty
+import UiFramework.Themes.Darkly exposing (darklyThemeConfig)
 import Url exposing (Url)
 import Utils
 
@@ -52,6 +55,7 @@ type DropdownMenuState
     = AllClosed
     | AccountOpen
     | LanguageOpen
+    | ThemeOpen
 
 
 type Page
@@ -75,8 +79,10 @@ type Msg
     | ToggleMenu
     | ToggleAccountDropdown
     | ToggleLanguageDropdown
+    | ToggleThemeDropdown
     | CloseDropdown
     | SelectLanguage I18n.Language
+    | SelectTheme ThemeConfig
     | HomeMsg Home.Msg
     | LoginMsg Login.Msg
     | LogoutMsg Logout.Msg
@@ -138,9 +144,7 @@ update sharedState msg model =
             , NoUpdate
             )
 
-        ( GetAccountResponse (RemoteData.Failure err), _ ) ->
-            -- This should not happen?
-            -- TODO show toasty error
+        ( GetAccountResponse (RemoteData.Failure _), _ ) ->
             ( model
             , Cmd.none
             , NoUpdate
@@ -175,6 +179,20 @@ update sharedState msg model =
             , NoUpdate
             )
 
+        ( ToggleThemeDropdown, _ ) ->
+            let
+                dropdownMenuState =
+                    if model.dropdownMenuState == ThemeOpen then
+                        AllClosed
+
+                    else
+                        ThemeOpen
+            in
+            ( { model | dropdownMenuState = dropdownMenuState }
+            , Cmd.none
+            , NoUpdate
+            )
+
         ( ToggleAccountDropdown, _ ) ->
             let
                 dropdownMenuState =
@@ -199,6 +217,12 @@ update sharedState msg model =
             ( { model | dropdownMenuState = AllClosed }
             , Cmd.none
             , UpdateLanguage language
+            )
+
+        ( SelectTheme themeConfig, _ ) ->
+            ( { model | dropdownMenuState = AllClosed }
+            , Cmd.none
+            , UpdateTheme themeConfig
             )
 
         ( ToastyMsg subMsg, _ ) ->
@@ -400,7 +424,7 @@ viewLayout sharedState model content =
         (column
             [ width fill
             , height fill
-            , Background.color Colors.white
+            , Background.color sharedState.themeConfig.bodyBackground
             , inFront <| UiFramework.Toasty.view ToastyMsg model.toasties
             ]
             [ FontAwesome.Styles.css |> html
@@ -408,21 +432,10 @@ viewLayout sharedState model content =
             , el
                 [ height fill
                 , width fill
-                , paddingXY 20 15
-                , Background.color Colors.gray100
-                , Border.color Colors.black
+                , Background.color sharedState.themeConfig.bodyBackground
+                , Font.color <| sharedState.themeConfig.fontColor sharedState.themeConfig.bodyBackground
                 ]
-                (el
-                    [ height fill
-                    , width fill
-                    , Background.color <| Colors.getColor "#fafafa"
-                    , Border.color Colors.gray400
-                    , Border.solid
-                    , Border.rounded 4
-                    , Border.width 1
-                    ]
-                    content
-                )
+                content
             , footer
             ]
         )
@@ -430,6 +443,17 @@ viewLayout sharedState model content =
 
 header : SharedState -> Model -> Element Msg
 header sharedState model =
+    let
+        context =
+            { device = sharedState.device
+            , themeConfig = sharedState.themeConfig
+            , parentRole = Nothing
+            , state =
+                { toggleMenuState = model.toggleMenuState
+                , dropdownState = model.dropdownMenuState
+                }
+            }
+    in
     Navbar.default ToggleMenu
         |> Navbar.withBrand brand
         |> Navbar.withBackgroundColor (Colors.getColor "#353d47")
@@ -438,39 +462,50 @@ header sharedState model =
                 |> Navbar.withMenuIcon FontAwesome.Solid.home
                 |> Navbar.withMenuTitle "Home"
 
-            -- TODO translate
+            -- Language
             , Navbar.dropdown ToggleLanguageDropdown LanguageOpen
                 |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuItem (SelectLanguage I18n.English)
+                    [ Navbar.dropdownMenuLinkItem (SelectLanguage I18n.English)
                         |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.English)
-                    , Navbar.dropdownMenuItem (SelectLanguage I18n.French)
+                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.French)
                         |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.French)
-                    , Navbar.dropdownMenuItem (SelectLanguage I18n.ChineseSimplified)
+                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.ChineseSimplified)
                         |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.ChineseSimplified)
                     ]
                 |> Navbar.DropdownItem
                 |> Navbar.withMenuIcon FontAwesome.Solid.flag
                 |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
+            -- Theme
+            , Navbar.dropdown ToggleThemeDropdown ThemeOpen
+                |> Navbar.withDropdownMenuItems
+                    [ Navbar.dropdownMenuLinkItem (SelectTheme defaultThemeConfig)
+                        |> Navbar.withDropdownMenuTitle "Bootstrap"
+                    , Navbar.dropdownMenuLinkItem (SelectTheme darklyThemeConfig)
+                        |> Navbar.withDropdownMenuTitle "Darkly"
+                    ]
+                |> Navbar.DropdownItem
+                |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
+                |> Navbar.withMenuTitle "Theme"
             , Navbar.dropdown ToggleAccountDropdown AccountOpen
                 |> Navbar.withDropdownMenuItems
                     (case sharedState.user of
-                        Just user ->
-                            [ Navbar.dropdownMenuItem (NavigateTo Settings)
+                        Just _ ->
+                            [ Navbar.dropdownMenuLinkItem (NavigateTo Settings)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.wrench
                                 |> Navbar.withDropdownMenuTitle "Settings"
-                            , Navbar.dropdownMenuItem (NavigateTo PasswordUpdate)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo PasswordUpdate)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.key
                                 |> Navbar.withDropdownMenuTitle "Password"
-                            , Navbar.dropdownMenuItem (NavigateTo Logout)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo Logout)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signOutAlt
                                 |> Navbar.withDropdownMenuTitle "Sign out"
                             ]
 
                         Nothing ->
-                            [ Navbar.dropdownMenuItem (NavigateTo Login)
+                            [ Navbar.dropdownMenuLinkItem (NavigateTo Login)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signInAlt
                                 |> Navbar.withDropdownMenuTitle "Sign in"
-                            , Navbar.dropdownMenuItem (NavigateTo Register)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo Register)
                                 |> Navbar.withDropdownMenuIcon FontAwesome.Solid.cashRegister
                                 |> Navbar.withDropdownMenuTitle "Register"
                             ]
@@ -480,10 +515,7 @@ header sharedState model =
                 |> Navbar.withMenuTitle "Account"
             ]
         |> Navbar.view
-            { deviceClass = sharedState.device.class
-            , toggleMenuState = model.toggleMenuState
-            , dropdownState = model.dropdownMenuState
-            }
+        |> toElement context
 
 
 footer : Element Msg

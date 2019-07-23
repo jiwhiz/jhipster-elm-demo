@@ -17,9 +17,9 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import UiFramework.Colors exposing (..)
+import UiFramework.Configuration exposing (..)
 import UiFramework.Internal as Internal
-import UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+import UiFramework.Types exposing (Role(..), Size(..))
 
 
 type alias UiElement context msg =
@@ -32,7 +32,7 @@ type Alert context msg
 
 type alias Options context msg =
     { role : Role
-    , size : ScreenSize
+    , size : Size
     , attributes : List (Attribute msg)
     , child : UiElement context msg
     }
@@ -45,12 +45,12 @@ withRole role (Alert options) =
 
 withLarge : Alert context msg -> Alert context msg
 withLarge (Alert options) =
-    Alert { options | size = LG }
+    Alert { options | size = SizeLarge }
 
 
 withSmall : Alert context msg -> Alert context msg
 withSmall (Alert options) =
-    Alert { options | size = SM }
+    Alert { options | size = SizeSmall }
 
 
 withExtraAttrs : List (Attribute msg) -> Alert context msg -> Alert context msg
@@ -66,7 +66,7 @@ withChild child (Alert options) =
 defaultOptions : Options context msg
 defaultOptions =
     { role = Primary
-    , size = MD
+    , size = SizeDefault
     , attributes = []
     , child = Internal.fromElement (\context -> none)
     }
@@ -103,28 +103,19 @@ view (Alert options) =
 viewAttributes : Internal.UiContextual context -> Options context mag -> List (Attribute msg)
 viewAttributes context options =
     let
-        backgroundColor =
-            alertBackgroundColor context.themeColor options.role
-
-        borderColor =
-            alertBorderColor context.themeColor options.role
-
-        fontColor =
-            alertFontColor context.themeColor options.role
-
-        fontSize =
-            getFontSize options.size
+        config =
+            context.themeConfig.alertConfig
     in
     [ width fill
-    , paddingXY 20 16
+    , paddingXY config.paddingX config.paddingY
     , Font.alignLeft
-    , Font.size fontSize
-    , Font.color fontColor
-    , Border.rounded 4
-    , Border.width 1
+    , Font.size <| config.fontSize options.size
+    , Font.color <| config.fontColor options.role
+    , Border.rounded <| config.borderRadius options.size
+    , Border.width <| config.borderWidth options.size
     , Border.solid
-    , Border.color borderColor
-    , Background.color backgroundColor
+    , Border.color <| config.borderColor options.role
+    , Background.color <| config.backgroundColor options.role
     ]
 
 
@@ -145,7 +136,7 @@ link { onPress, label } =
                     context.parentRole |> Maybe.withDefault Primary
 
                 fontColor =
-                    alertLinkFontColor context.themeColor role
+                    context.themeConfig.alertConfig.fontColor role
             in
             Input.button
                 [ Font.bold, Font.color fontColor ]

@@ -1,4 +1,4 @@
-module UiFramework.Types exposing (Role(..), ScreenSize(..), getFontSize)
+module UiFramework.Types exposing (Role(..), ScreenSize(..), Size(..))
 
 
 type Role
@@ -20,20 +20,8 @@ type ScreenSize
     | XL
 
 
-getFontSize : ScreenSize -> Int
-getFontSize size =
-    case size of
-        XS ->
-            12
+type Size
+    = SizeSmall
+    | SizeDefault
+    | SizeLarge
 
-        SM ->
-            14
-
-        MD ->
-            16
-
-        LG ->
-            20
-
-        XL ->
-            24

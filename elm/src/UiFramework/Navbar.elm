@@ -1,4 +1,4 @@
-module UiFramework.Navbar exposing (BackgroundColor(..), Dropdown(..), DropdownMenuItem(..), DropdownOptions, LinkItemOptions, MenuItem(..), Navbar(..), NavbarOptions, NavbarState, default, dropdown, dropdownMenuItem, linkItem, onClick, view, viewCollapsedMenuList, viewDropdownItem, viewDropdownMenu, viewLinkItem, viewMenuItem, viewMenubarList, withBackground, withBackgroundColor, withBrand, withDropdownMenuIcon, withDropdownMenuItems, withDropdownMenuTitle, withExtraAttrs, withMenuIcon, withMenuItems, withMenuTitle)
+module UiFramework.Navbar exposing (..)
 
 import Element exposing (..)
 import Element.Background as Background
@@ -8,27 +8,41 @@ import Element.Region as Region
 import Html.Events
 import Json.Decode as Json
 import UiFramework.Colors as Colors
+import UiFramework.Configuration exposing (..)
 import UiFramework.Icon as Icon
-import UiFramework.Types exposing (Role(..), ScreenSize(..))
-
-
-type Navbar msg state
-    = Navbar (NavbarOptions msg state)
-
-
-type alias NavbarOptions msg state =
-    { toggleMenuMsg : msg
-    , brand : Maybe (Element msg)
-    , backgroundColor : BackgroundColor
-    , items : List (MenuItem msg state)
-    , attributes : List (Attribute msg)
-    }
+import UiFramework.Internal as Internal
+import UiFramework.Types exposing (Role(..), Size(..))
 
 
 type alias NavbarState state =
-    { deviceClass : DeviceClass
-    , toggleMenuState : Bool
+    { toggleMenuState : Bool
     , dropdownState : state
+    }
+
+
+type alias Context context state =
+    { context
+        | device : Device
+        , themeConfig : ThemeConfig
+        , parentRole : Maybe Role
+        , state : NavbarState state
+    }
+
+
+type alias UiElement context state msg =
+    Internal.WithContext (Context context state) msg
+
+
+type Navbar context state msg
+    = Navbar (NavbarOptions context state msg)
+
+
+type alias NavbarOptions context state msg =
+    { toggleMenuMsg : msg
+    , brand : Maybe (Element msg)
+    , backgroundColor : BackgroundColor
+    , items : List (MenuItem context state msg)
+    , attributes : List (Attribute msg)
     }
 
 
@@ -38,9 +52,9 @@ type BackgroundColor
     | Class String
 
 
-type MenuItem msg state
+type MenuItem context state msg
     = LinkItem (LinkItemOptions msg)
-    | DropdownItem (Dropdown msg state)
+    | DropdownItem (Dropdown context state msg)
     | CustomItem
 
 
@@ -51,49 +65,50 @@ type alias LinkItemOptions msg =
     }
 
 
-type Dropdown msg state
-    = Dropdown (DropdownOptions msg state)
+type Dropdown context state msg
+    = Dropdown (DropdownOptions context state msg)
 
 
-type DropdownMenuItem msg
-    = DropdownMenuItem (LinkItemOptions msg)
+type DropdownMenuItem context msg
+    = DropdownMenuLinkItem (LinkItemOptions msg)
+    | DropdownMenuCustomItem
 
 
-type alias DropdownOptions msg state =
+type alias DropdownOptions context state msg =
     { toggleDropdownMsg : msg
     , openState : state
     , icon : Maybe Icon.Icon
     , title : String
-    , items : List (DropdownMenuItem msg)
+    , items : List (DropdownMenuItem context msg)
     }
 
 
-withBrand : Element msg -> Navbar msg state -> Navbar msg state
+withBrand : Element msg -> Navbar context state msg -> Navbar context state msg
 withBrand brand (Navbar options) =
     Navbar { options | brand = Just brand }
 
 
-withBackground : Role -> Navbar msg state -> Navbar msg state
+withBackground : Role -> Navbar context state msg -> Navbar context state msg
 withBackground role (Navbar options) =
     Navbar { options | backgroundColor = Roled role }
 
 
-withBackgroundColor : Color -> Navbar msg state -> Navbar msg state
+withBackgroundColor : Color -> Navbar context state msg -> Navbar context state msg
 withBackgroundColor color (Navbar options) =
     Navbar { options | backgroundColor = Custom color }
 
 
-withMenuItems : List (MenuItem msg state) -> Navbar msg state -> Navbar msg state
+withMenuItems : List (MenuItem context state msg) -> Navbar context state msg -> Navbar context state msg
 withMenuItems items (Navbar options) =
     Navbar { options | items = items }
 
 
-withExtraAttrs : List (Attribute msg) -> Navbar msg state -> Navbar msg state
+withExtraAttrs : List (Attribute msg) -> Navbar context state msg -> Navbar context state msg
 withExtraAttrs attributes (Navbar options) =
     Navbar { options | attributes = attributes }
 
 
-default : msg -> Navbar msg state
+default : msg -> Navbar context state msg
 default msg =
     Navbar
         { toggleMenuMsg = msg
@@ -104,7 +119,7 @@ default msg =
         }
 
 
-linkItem : msg -> MenuItem msg state
+linkItem : msg -> MenuItem context state msg
 linkItem msg =
     LinkItem
         { triggerMsg = msg
@@ -113,7 +128,7 @@ linkItem msg =
         }
 
 
-withMenuIcon : Icon.Icon -> MenuItem msg state -> MenuItem msg state
+withMenuIcon : Icon.Icon -> MenuItem context state msg -> MenuItem context state msg
 withMenuIcon icon item =
     case item of
         LinkItem options ->
@@ -126,7 +141,7 @@ withMenuIcon icon item =
             item
 
 
-withMenuTitle : String -> MenuItem msg state -> MenuItem msg state
+withMenuTitle : String -> MenuItem context state msg -> MenuItem context state msg
 withMenuTitle title item =
     case item of
         LinkItem options ->
@@ -139,7 +154,7 @@ withMenuTitle title item =
             item
 
 
-dropdown : msg -> state -> Dropdown msg state
+dropdown : msg -> state -> Dropdown context state msg
 dropdown msg openState =
     Dropdown
         { toggleDropdownMsg = msg
@@ -150,210 +165,269 @@ dropdown msg openState =
         }
 
 
-withDropdownMenuItems : List (DropdownMenuItem msg) -> Dropdown msg state -> Dropdown msg state
+withDropdownMenuItems : List (DropdownMenuItem context msg) -> Dropdown context state msg -> Dropdown context state msg
 withDropdownMenuItems items (Dropdown options) =
     Dropdown { options | items = items }
 
 
-dropdownMenuItem : msg -> DropdownMenuItem msg
-dropdownMenuItem msg =
-    DropdownMenuItem
+dropdownMenuLinkItem : msg -> DropdownMenuItem context msg
+dropdownMenuLinkItem msg =
+    DropdownMenuLinkItem
         { triggerMsg = msg
         , icon = Nothing
         , title = ""
         }
 
 
-withDropdownMenuIcon : Icon.Icon -> DropdownMenuItem msg -> DropdownMenuItem msg
-withDropdownMenuIcon icon (DropdownMenuItem options) =
-    DropdownMenuItem { options | icon = Just icon }
+withDropdownMenuIcon : Icon.Icon -> DropdownMenuItem context msg -> DropdownMenuItem context msg
+withDropdownMenuIcon icon item =
+    case item of
+        DropdownMenuLinkItem options ->
+            DropdownMenuLinkItem { options | icon = Just icon }
+
+        DropdownMenuCustomItem ->
+            item  -- TODO impl for custome item
 
 
-withDropdownMenuTitle : String -> DropdownMenuItem msg -> DropdownMenuItem msg
-withDropdownMenuTitle title (DropdownMenuItem options) =
-    DropdownMenuItem { options | title = title }
+withDropdownMenuTitle : String -> DropdownMenuItem context msg -> DropdownMenuItem context msg
+withDropdownMenuTitle title item  =
+    case item of
+        DropdownMenuLinkItem options ->
+            DropdownMenuLinkItem { options | title = title }
+
+        DropdownMenuCustomItem ->
+            item  -- TODO impl for custome item
 
 
 
 -- Render Navbar
 
 
-view : NavbarState state -> Navbar msg state -> Element msg
-view state (Navbar options) =
-    let
-        backgroundColor =
-            case options.backgroundColor of
-                Roled role ->
-                    Colors.defaultThemeColor role
+view : Navbar context state msg -> UiElement context state msg
+view (Navbar options) =
+    Internal.flatMap
+        (\context ->
+            let
+                navbarConfig =
+                    context.themeConfig.navbarConfig
 
-                Custom color ->
-                    color
+                backgroundColor =
+                    case options.backgroundColor of
+                        Roled role ->
+                            context.themeConfig.themeColor role
 
-                Class cssStr ->
-                    Colors.getColor cssStr
+                        Custom color ->
+                            color
 
-        fontColor =
-            Colors.contrastTextColor backgroundColor Colors.defaultTextDark Colors.defaultTextLight
+                        Class cssStr ->
+                            Colors.getColor cssStr
 
-        headerAttrs =
-            [ width fill
-            , paddingXY 20 16
-            , Border.solid
-            , Border.color Colors.gray300
-            , Border.widthEach { bottom = 1, top = 0, left = 0, right = 0 }
-            , Background.color backgroundColor
-            , Font.color fontColor
-            ]
+                fontColor =
+                    context.themeConfig.fontColor backgroundColor
 
-        brand =
-            options.brand |> Maybe.withDefault none
+                headerAttrs =
+                    [ width fill
+                    , paddingXY navbarConfig.paddingX navbarConfig.paddingY
+                    , Background.color backgroundColor
+                    , Font.color fontColor
+                    ]
 
-        navButton : msg -> Element msg
-        navButton toggleMenuMsg =
-            el
-                [ onClick toggleMenuMsg
-                , alignRight
-                , Border.color fontColor
-                , Border.solid
-                , Border.width 1
-                , Border.rounded 3
-                , Border.shadow { offset = ( 0, 0 ), size = 0, blur = 4, color = rgba 0 0 0 0.2 }
-                ]
-            <|
-                column [ spacing 4, padding 10 ]
-                    [ iconBar, iconBar, iconBar ]
+                brand attrs =
+                    Internal.fromElement
+                        (\_ -> 
+                            el attrs
+                            (options.brand |> Maybe.withDefault none)
+                        )
 
-        iconBar =
-            el
-                [ width <| px 22
-                , height <| px 2
-                , Background.color fontColor
-                , Border.rounded 1
-                ]
-                none
-    in
-    case state.deviceClass of
+                navButton toggleMenuMsg =
+                    Internal.fromElement
+                        (\_ ->
+                            el
+                                [ onClick toggleMenuMsg
+                                , alignLeft
+                                , paddingXY navbarConfig.togglerPaddingX navbarConfig.togglerPaddingY
+                                , Border.color fontColor
+                                , Border.solid
+                                , Border.width 1
+                                , Border.rounded navbarConfig.togglerBorderRadius
+                                , pointer
+                                ]
+                            <|
+                                column
+                                    [ spacing 6, padding 6 ]
+                                    [ iconBar, iconBar, iconBar ]
+                        )
+
+                iconBar =
+                    el
+                        [ width <| px 24
+                        , height <| px 2
+                        , Background.color fontColor
+                        , Border.rounded 1
+                        ]
+                        none
+            in
+            if collapseNavbar context.device then
+                Internal.uiColumn headerAttrs <|
+                    [ Internal.uiRow [ width fill ]
+                        [ navButton options.toggleMenuMsg
+                        , brand [ alignRight ]
+                        ]
+                    ]
+                        ++ (if context.state.toggleMenuState then
+                                [ viewCollapsedMenuList options.items ]
+
+                            else
+                                []
+                            )
+
+            else
+                Internal.uiRow headerAttrs [ brand [ alignLeft ], viewMenubarList options.items ]
+        )
+
+
+collapseNavbar device =
+    case device.class of
         Phone ->
-            column headerAttrs <|
-                [ row [ width fill, paddingEach { top = 10, right = 20, bottom = 10, left = 10 } ]
-                    [ brand, navButton options.toggleMenuMsg ]
-                ]
-                    ++ (if state.toggleMenuState then
-                            [ viewCollapsedMenuList state options.items ]
+            True
 
-                        else
-                            []
-                       )
+        Tablet ->
+            if device.orientation == Portrait then
+                True
+            else
+                False
 
         _ ->
-            row headerAttrs [ brand, viewMenubarList state options.items ]
+            False
 
 
-viewCollapsedMenuList : NavbarState state -> List (MenuItem msg state) -> Element msg
-viewCollapsedMenuList state items =
-    column
-        [ Region.navigation
-        , width fill
-        , paddingXY 0 10
-        , spacing 5
-        , alignLeft
-        , Font.size 14
-        , Font.alignLeft
-        ]
-    <|
-        List.map (viewMenuItem state) items
+viewCollapsedMenuList : List (MenuItem context state msg) -> UiElement context state msg
+viewCollapsedMenuList items =
+    Internal.fromElement
+        (\context ->
+            column
+                [ Region.navigation
+                , width fill
+                , alignLeft
+                , Font.alignLeft
+                ]
+                <| List.map (viewMenuItem >> Internal.toElement context) items
+        )
 
 
-viewMenubarList : NavbarState state -> List (MenuItem msg state) -> Element msg
-viewMenubarList state items =
-    row
-        [ Region.navigation
-        , paddingEach { top = 20, right = 30, bottom = 20, left = 100 }
-        , spacing 15
-        , alignRight
-        , Font.size 16
-        , Font.center
-        , Font.medium
-        ]
-    <|
-        List.map (viewMenuItem state) items
+viewMenubarList : List (MenuItem context state msg) -> UiElement context state msg
+viewMenubarList items =
+    Internal.fromElement
+        (\context ->
+            row
+                [ Region.navigation
+                , alignRight
+                , Font.center
+                ]
+                <| List.map (viewMenuItem >> Internal.toElement context) items
+        )
 
 
-viewMenuItem : NavbarState state -> MenuItem msg state -> Element msg
-viewMenuItem state item =
+viewMenuItem : MenuItem context state msg -> UiElement context state msg
+viewMenuItem item =
     case item of
         LinkItem options ->
             viewLinkItem options
 
         DropdownItem (Dropdown options) ->
-            viewDropdownItem state options
+            viewDropdownItem options
 
         CustomItem ->
-            none
+            Internal.uiNone
 
 
-viewLinkItem : LinkItemOptions msg -> Element msg
+viewLinkItem : LinkItemOptions msg -> UiElement context state msg
 viewLinkItem options =
-    el
-        [ onClick options.triggerMsg
-        , paddingEach { top = 8, right = 12, bottom = 8, left = 12 }
-        , width fill
-        , pointer
-        ]
-        (case options.icon of
-            Nothing ->
-                text options.title
+    Internal.fromElement
+        (\context ->
+            el
+                [ onClick options.triggerMsg
+                , paddingXY
+                    context.themeConfig.navConfig.linkPaddingX
+                    context.themeConfig.navConfig.linkPaddingY
+                , width fill
+                , pointer
+                ]
+                (case options.icon of
+                    Nothing ->
+                        text options.title
 
-            Just icon ->
-                row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text options.title) ]
-        )
-
-
-viewDropdownItem : NavbarState state -> DropdownOptions msg state -> Element msg
-viewDropdownItem state options =
-    el
-        [ onClick options.toggleDropdownMsg
-        , paddingEach { top = 8, right = 12, bottom = 8, left = 12 }
-        , pointer
-        , below <|
-            if state.dropdownState == options.openState then
-                viewDropdownMenu options.items
-
-            else
-                none
-        ]
-        (case options.icon of
-            Nothing ->
-                text <| options.title ++ " ▾"
-
-            Just icon ->
-                row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text <| options.title ++ " ▾") ]
-        )
-
-
-viewDropdownMenu : List (DropdownMenuItem msg) -> Element msg
-viewDropdownMenu items =
-    el [ alignRight ] <|
-        column
-            [ paddingXY 10 10
-            , spacing 0
-            , Background.color Colors.white
-            , Font.color Colors.gray900
-            , Font.alignLeft
-            , Border.rounded 5
-            , Border.color (rgba 0 0 0 0.15)
-            , Border.solid
-            , Border.width 1
-            , Border.shadow { offset = ( 0, 5 ), size = 0, blur = 10, color = rgba 0 0 0 0.2 }
-
-            -- , Element.explain Debug.todo
-            ]
-            (List.map
-                (\(DropdownMenuItem options) ->
-                    viewLinkItem options
+                    Just icon ->
+                        row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text options.title) ]
                 )
-                items
-            )
+        )
+
+
+viewDropdownItem : DropdownOptions context state msg -> UiElement context state msg
+viewDropdownItem options =
+    Internal.fromElement
+        (\context ->
+            el
+                [ onClick options.toggleDropdownMsg
+                , paddingXY
+                    context.themeConfig.navConfig.linkPaddingX
+                    context.themeConfig.navConfig.linkPaddingY
+                , pointer
+                , below <|
+                    if context.state.dropdownState == options.openState then
+                        Internal.toElement context <| viewDropdownMenu options.items
+
+                    else
+                        none
+                ]
+                (case options.icon of
+                    Nothing ->
+                        text <| options.title ++ " ▾"
+
+                    Just icon ->
+                        row [ spacing 5 ] [ el [] <| Icon.view icon, el [] (text <| options.title ++ " ▾") ]
+                )
+        )
+
+
+viewDropdownMenu : List (DropdownMenuItem context msg) -> UiElement context state msg
+viewDropdownMenu items =
+    Internal.fromElement
+        (\context ->
+            let
+                dropdownConfig = context.themeConfig.dropdownConfig
+
+                menuAlignment =
+                    if collapseNavbar context.device then
+                        alignLeft
+                    
+                    else 
+                        alignRight
+            in
+            el [ menuAlignment ] <|
+                column
+                    [ paddingXY dropdownConfig.paddingX dropdownConfig.paddingY
+                    , spacing dropdownConfig.spacer
+                    , Background.color dropdownConfig.backgroundColor
+                    , Font.color dropdownConfig.fontColor
+                    , Font.alignLeft
+                    , Border.rounded dropdownConfig.borderRadius
+                    , Border.color dropdownConfig.borderColor
+                    , Border.solid
+                    , Border.width dropdownConfig.borderWidth
+                    ]
+                    (List.map
+                        (\item ->
+                            case item of
+                                DropdownMenuLinkItem options ->
+                                    Internal.toElement context <| viewLinkItem options
+                                
+                                DropdownMenuCustomItem ->
+                                    none -- TODO ?
+                        )
+                        items
+                    )
+        )
 
 
 onClick : msg -> Attribute msg

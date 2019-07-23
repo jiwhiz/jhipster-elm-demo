@@ -7,13 +7,14 @@ import Element exposing (Device)
 import I18n exposing (Language(..), languageFromCode)
 import Time exposing (Posix, Zone)
 import Toasty.Defaults
-
+import UiFramework.Configuration exposing (ThemeConfig)
 
 type alias SharedState =
     { navKey : Browser.Navigation.Key
     , currentTime : Maybe Posix
     , timezone : Maybe Zone
     , language : Language
+    , themeConfig : ThemeConfig
     , device : Device
     , jwtToken : Maybe String
     , user : Maybe User
@@ -25,6 +26,7 @@ type SharedStateUpdate
     | UpdateTime Posix
     | UpdateTimezone Zone
     | UpdateLanguage Language
+    | UpdateTheme ThemeConfig
     | UpdateDevice Device
     | UpdateUser User
     | RefreshLogin
@@ -43,6 +45,9 @@ update sharedState sharedStateUpdate =
 
         UpdateLanguage language ->
             { sharedState | language = language }
+
+        UpdateTheme themeConfig ->
+            { sharedState | themeConfig = themeConfig }
 
         UpdateDevice device ->
             { sharedState | device = device }

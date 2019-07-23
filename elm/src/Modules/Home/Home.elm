@@ -52,7 +52,7 @@ toContext sharedState =
     { translate = translator sharedState.language
     , user = sharedState.user
     , device = sharedState.device
-    , themeColor = Colors.defaultThemeColor
+    , themeConfig = sharedState.themeConfig
     , parentRole = Nothing
     }
 

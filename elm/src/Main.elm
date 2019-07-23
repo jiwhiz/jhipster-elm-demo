@@ -15,6 +15,7 @@ import Router
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Time exposing (Posix, Zone)
+import UiFramework.Configuration exposing (defaultThemeConfig)
 import Url
 
 
@@ -170,6 +171,7 @@ getReady maybeUser model =
                     , currentTime = time
                     , timezone = zone
                     , language = getUserLanguage maybeUser
+                    , themeConfig = defaultThemeConfig
                     , device = device
                     , jwtToken = model.maybeJwtToken
                     , user = maybeUser

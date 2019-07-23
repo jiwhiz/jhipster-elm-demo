@@ -1,6 +1,7 @@
 module UiFramework.Internal exposing (UiContextual, WithContext, flatMap, fromElement, node, toElement, uiColumn, uiNone, uiParagraph, uiRow, uiText)
 
 import Element exposing (Attribute, Color, Device, Element)
+import UiFramework.Configuration exposing (ThemeConfig)
 import UiFramework.Types exposing (Role(..))
 
 
@@ -14,7 +15,7 @@ type WithContext context msg
 type alias UiContextual context =
     { context
         | device : Device
-        , themeColor : Role -> Color
+        , themeConfig : ThemeConfig
         , parentRole : Maybe Role
     }
 
@@ -54,6 +55,7 @@ node =
     Node
 
 
+uiNone : WithContext (UiContextual c) msg
 uiNone =
     Leaf <| \_ -> Element.none
 
