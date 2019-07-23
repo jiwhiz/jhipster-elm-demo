@@ -123,7 +123,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "Main MSG" msg of
+    case msg of
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -324,10 +324,6 @@ withErrorLog err updateTuple =
 
 logError : String -> Cmd Msg
 logError error =
-    let
-        log =
-            Debug.log "ERROR" error
-    in
     Cmd.none
 
 
