@@ -97,7 +97,6 @@ darklyInputConfig themeColor =
     { default
         | fontColor = bootstrapColors.gray700
         , borderColor = transparent
-        , focusedBorderColor = themeColor Primary
     }
 
 

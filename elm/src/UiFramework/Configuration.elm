@@ -1,4 +1,4 @@
-module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig, inputBorderRadius, rem)
+module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig, rem)
 
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import Element.Font as Font
@@ -225,7 +225,7 @@ defaultFontSize size =
 
 
 
--- based off of font sizes
+-- multiply by default font size to get size in px
 
 
 rem : Float -> (Size -> Int)
@@ -253,28 +253,8 @@ defaultAlertConfig themeColor =
 
 defaultButtonConfig : ThemeColor -> ButtonConfig
 defaultButtonConfig themeColor =
-    { paddingX =
-        \size ->
-            case size of
-                SizeSmall ->
-                    8
-
-                SizeDefault ->
-                    12
-
-                SizeLarge ->
-                    16
-    , paddingY =
-        \size ->
-            case size of
-                SizeSmall ->
-                    4
-
-                SizeDefault ->
-                    6
-
-                SizeLarge ->
-                    8
+    { paddingX = rem 0.75
+    , paddingY = rem 0.375
     , backgroundColor = themeColor
     , fontColor =
         \role ->
@@ -284,17 +264,7 @@ defaultButtonConfig themeColor =
     , borderWidth =
         \size ->
             1
-    , borderRadius =
-        \size ->
-            case size of
-                SizeSmall ->
-                    3
-
-                SizeDefault ->
-                    4
-
-                SizeLarge ->
-                    5
+    , borderRadius = rem 0.25
     }
 
 
