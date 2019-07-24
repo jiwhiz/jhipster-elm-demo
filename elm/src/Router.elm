@@ -1,17 +1,9 @@
-module Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..), brand, footer, header, init, initWith, isCurrentRoute, isUnderAccount, logo, navigateTo, project, subscriptions, transform, update, updateWith, version, view, viewLayout)
+module Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..), init, initWith, subscriptions, update)
 
 import Api.Data.User as User
 import Api.Request.Account exposing (getCurrentAccount)
-import Browser
 import Browser.Events as Events
 import Browser.Navigation
-import Element exposing (..)
-import Element.Background as Background
-import Element.Font as Font
-import FontAwesome.Brands
-import FontAwesome.Solid
-import FontAwesome.Styles
-import Html
 import I18n
 import Json.Decode as Json
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
@@ -31,12 +23,7 @@ import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Toasty
 import Toasty.Defaults
-import UiFramework exposing (toElement)
-import UiFramework.Colors as Colors
-import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
-import UiFramework.Navbar as Navbar
-import UiFramework.Toasty
-import UiFramework.Themes.Darkly exposing (darklyThemeConfig)
+import UiFramework.Configuration exposing (ThemeConfig)
 import Url exposing (Url)
 import Utils
 
@@ -113,8 +100,8 @@ init url =
     )
 
 
-subscriptions : SharedState -> Model -> Sub Msg
-subscriptions sharedState model =
+subscriptions : Model -> Sub Msg
+subscriptions model =
     if model.dropdownMenuState /= AllClosed then
         Events.onClick (Json.succeed CloseDropdown)
 
@@ -131,7 +118,7 @@ update sharedState msg model =
                     fromUrl location
 
                 ( newModel, newCmd, newSharedStateUpdate ) =
-                    navigateTo route sharedState model
+                    navigateTo route model
             in
             ( { newModel | route = route }
             , newCmd
@@ -322,8 +309,8 @@ updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
     )
 
 
-navigateTo : Route -> SharedState -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
-navigateTo route sharedState model =
+navigateTo : Route -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
+navigateTo route model =
     case route of
         Home ->
             Home.init |> initWith HomePage HomeMsg model NoUpdate
@@ -365,232 +352,3 @@ initWith toPage toMsg model sharedStateUpdate ( subModel, subCmd ) =
     , Cmd.map toMsg subCmd
     , sharedStateUpdate
     )
-
-
-
--- VIEW --
-
-
-view : (Msg -> msg) -> SharedState -> Model -> Browser.Document msg
-view msgMapper sharedState model =
-    let
-        ( title, body ) =
-            case model.currentPage of
-                NotFoundPage pageModel ->
-                    NotFound.view sharedState pageModel |> transform sharedState NotFoundMsg model
-
-                HomePage pageModel ->
-                    Home.view sharedState pageModel |> transform sharedState HomeMsg model
-
-                LoginPage pageModel ->
-                    Login.view sharedState pageModel |> transform sharedState LoginMsg model
-
-                LogoutPage pageModel ->
-                    Logout.view sharedState pageModel |> transform sharedState LogoutMsg model
-
-                RegisterPage pageModel ->
-                    Register.view sharedState pageModel |> transform sharedState RegisterMsg model
-
-                PasswordResetRequestPage pageModel ->
-                    PasswordResetRequest.view sharedState pageModel |> transform sharedState PasswordResetRequestMsg model
-
-                PasswordResetFinishPage pageModel ->
-                    PasswordResetFinish.view sharedState pageModel |> transform sharedState PasswordResetFinishMsg model
-
-                SettingsPage pageModel ->
-                    Settings.view sharedState pageModel |> transform sharedState SettingsMsg model
-
-                PasswordUpdatePage pageModel ->
-                    PasswordUpdate.view sharedState pageModel |> transform sharedState PasswordUpdateMsg model
-
-                ActivatePage pageModel ->
-                    Activate.view sharedState pageModel |> transform sharedState ActivateMsg model
-    in
-    { title = "jHipster Elm Demo - " ++ title
-    , body = List.singleton (Html.map msgMapper body)
-    }
-
-
-transform : SharedState -> (a -> Msg) -> Model -> ( String, Element a ) -> ( String, Html.Html Msg )
-transform sharedState toMsg model =
-    Tuple.mapSecond (Element.map toMsg)
-        >> Tuple.mapSecond (viewLayout sharedState model)
-
-
-viewLayout : SharedState -> Model -> Element Msg -> Html.Html Msg
-viewLayout sharedState model content =
-    Element.layout
-        []
-        (column
-            [ width fill
-            , height fill
-            , Background.color sharedState.themeConfig.bodyBackground
-            , inFront <| UiFramework.Toasty.view ToastyMsg model.toasties
-            ]
-            [ FontAwesome.Styles.css |> html
-            , header sharedState model
-            , el
-                [ height fill
-                , width fill
-                , Background.color sharedState.themeConfig.bodyBackground
-                , Font.color <| sharedState.themeConfig.fontColor sharedState.themeConfig.bodyBackground
-                ]
-                content
-            , footer
-            ]
-        )
-
-
-header : SharedState -> Model -> Element Msg
-header sharedState model =
-    let
-        context =
-            { device = sharedState.device
-            , themeConfig = sharedState.themeConfig
-            , parentRole = Nothing
-            , state =
-                { toggleMenuState = model.toggleMenuState
-                , dropdownState = model.dropdownMenuState
-                }
-            }
-    in
-    Navbar.default ToggleMenu
-        |> Navbar.withBrand brand
-        |> Navbar.withBackgroundColor (Colors.getColor "#353d47")
-        |> Navbar.withMenuItems
-            [ Navbar.linkItem (NavigateTo Home)
-                |> Navbar.withMenuIcon FontAwesome.Solid.home
-                |> Navbar.withMenuTitle "Home"
-
-            -- Language
-            , Navbar.dropdown ToggleLanguageDropdown LanguageOpen
-                |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuLinkItem (SelectLanguage I18n.English)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.English)
-                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.French)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.French)
-                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.ChineseSimplified)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.ChineseSimplified)
-                    ]
-                |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Solid.flag
-                |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
-            -- Theme
-            , Navbar.dropdown ToggleThemeDropdown ThemeOpen
-                |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuLinkItem (SelectTheme defaultThemeConfig)
-                        |> Navbar.withDropdownMenuTitle "Bootstrap"
-                    , Navbar.dropdownMenuLinkItem (SelectTheme darklyThemeConfig)
-                        |> Navbar.withDropdownMenuTitle "Darkly"
-                    ]
-                |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
-                |> Navbar.withMenuTitle "Theme"
-            , Navbar.dropdown ToggleAccountDropdown AccountOpen
-                |> Navbar.withDropdownMenuItems
-                    (case sharedState.user of
-                        Just _ ->
-                            [ Navbar.dropdownMenuLinkItem (NavigateTo Settings)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.wrench
-                                |> Navbar.withDropdownMenuTitle "Settings"
-                            , Navbar.dropdownMenuLinkItem (NavigateTo PasswordUpdate)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.key
-                                |> Navbar.withDropdownMenuTitle "Password"
-                            , Navbar.dropdownMenuLinkItem (NavigateTo Logout)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signOutAlt
-                                |> Navbar.withDropdownMenuTitle "Sign out"
-                            ]
-
-                        Nothing ->
-                            [ Navbar.dropdownMenuLinkItem (NavigateTo Login)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signInAlt
-                                |> Navbar.withDropdownMenuTitle "Sign in"
-                            , Navbar.dropdownMenuLinkItem (NavigateTo Register)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.cashRegister
-                                |> Navbar.withDropdownMenuTitle "Register"
-                            ]
-                    )
-                |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Solid.user
-                |> Navbar.withMenuTitle "Account"
-            ]
-        |> Navbar.view
-        |> toElement context
-
-
-footer : Element Msg
-footer =
-    paragraph [ paddingXY 20 10, Background.color (rgb255 248 248 248), Font.size 10 ]
-        [ text "This is footer." ]
-
-
-brand : Element Msg
-brand =
-    row [] [ logo, row [ centerY ] [ project, version ] ]
-
-
-logo : Element Msg
-logo =
-    image [ height (px 45) ] { src = "/logo-jhipster.png", description = "Logo" }
-
-
-project : Element Msg
-project =
-    el
-        [ padding 0
-        , alignBottom
-        , Font.size 24
-        , Font.bold
-        ]
-        (text "JelmHipster")
-
-
-version : Element Msg
-version =
-    el
-        [ paddingEach { top = 0, right = 0, bottom = 0, left = 10 }
-        , alignBottom
-        , Font.size 10
-        ]
-        (text "0.0.1-SNAPSHOT")
-
-
-isCurrentRoute : Model -> Routes.Route -> Bool
-isCurrentRoute model route =
-    case ( model.currentPage, route ) of
-        ( HomePage _, Routes.Home ) ->
-            True
-
-        ( LoginPage _, Routes.Login ) ->
-            True
-
-        ( LogoutPage _, Routes.Logout ) ->
-            True
-
-        ( RegisterPage _, Routes.Register ) ->
-            True
-
-        _ ->
-            False
-
-
-isUnderAccount : Model -> Bool
-isUnderAccount model =
-    case model.currentPage of
-        LoginPage _ ->
-            True
-
-        RegisterPage _ ->
-            True
-
-        SettingsPage _ ->
-            True
-
-        PasswordUpdatePage _ ->
-            True
-
-        LogoutPage _ ->
-            True
-
-        _ ->
-            False

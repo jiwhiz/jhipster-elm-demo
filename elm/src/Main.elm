@@ -12,6 +12,7 @@ import Json.Decode as Decode
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
+import RouterView
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Time exposing (Posix, Zone)
@@ -99,7 +100,7 @@ subscriptions model =
             )
         , case model.appState of
             Ready sharedState routerModel ->
-                Sub.map RouterMsg <| Router.subscriptions sharedState routerModel
+                Sub.map RouterMsg <| Router.subscriptions routerModel
 
             _ ->
                 Sub.none
@@ -123,7 +124,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "Main MSG" msg of
+    case msg of
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -324,10 +325,10 @@ withErrorLog err updateTuple =
 
 logError : String -> Cmd Msg
 logError error =
-    let
-        log =
-            Debug.log "ERROR" error
-    in
+    -- let
+    --     log =
+    --         Debug.log "ERROR" error
+    -- in
     Cmd.none
 
 
@@ -339,7 +340,7 @@ view : Model -> Browser.Document Msg
 view model =
     case model.appState of
         Ready sharedState routerModel ->
-            Router.view RouterMsg sharedState routerModel
+            RouterView.view RouterMsg sharedState routerModel
 
         NotReady _ _ _ ->
             { title = "jHipster Elm Demo - Loading"

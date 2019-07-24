@@ -38,7 +38,7 @@ languageName : Language -> String
 languageName lang =
     case lang of
         ChineseSimplified ->
-            "中文（简体）"
+            "中文(简体)"
 
         English ->
             "English"
