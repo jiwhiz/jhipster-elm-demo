@@ -1,4 +1,4 @@
-module UiFramework.Colors exposing (..)
+module UiFramework.Colors exposing (alterColor, calculateWeight, colorLevel, contrastTextColor, darken, fromHex, fromHex8, getColor, hex2ToInt, hexToInt, hsla, lighten, limit, mixChannel, toHsla, transparent, weightedMix)
 
 import Bitwise exposing (shiftLeftBy)
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
@@ -60,6 +60,7 @@ alterColor color alpha =
         , blue = rgba.blue
         , alpha = alpha
         }
+
 
 
 -- Util functions
@@ -374,3 +375,8 @@ toHsla color =
     , lightness = l
     , alpha = a
     }
+
+
+transparent : Color
+transparent =
+    rgba 0 0 0 0
