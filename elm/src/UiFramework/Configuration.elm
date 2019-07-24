@@ -1,4 +1,4 @@
-module UiFramework.Configuration exposing (..)
+module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig, inputBorderRadius, rem)
 
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import Element.Font as Font
@@ -103,6 +103,35 @@ type alias DropdownConfig =
     }
 
 
+
+{--
+-- we don't have a Config record to pump through out InputConfig function yet so we cannot do this yet
+-- we'll just have to stick with the default configs (primary colour and default size)
+
+type alias InputConfig =
+    { fontColor : Color 
+    , fontSize : Size -> Int 
+    . paddingX : Size -> Int 
+    , paddingY : Size -> Int 
+    , borderRadius : Size -> Int 
+    , borderColor : Role -> Color
+    , focusedBorderColor : Color 
+    }
+
+--}
+
+
+type alias InputConfig =
+    { fontColor : Color
+    , fontSize : Int
+    , paddingX : Int
+    , paddingY : Int
+    , borderRadius : Int
+    , borderColor : Color
+    , focusedBorderColor : Color
+    }
+
+
 type alias ThemeConfig =
     { colors : Colors
     , themeColor : ThemeColor
@@ -115,6 +144,7 @@ type alias ThemeConfig =
     , dropdownConfig : DropdownConfig
     , navbarConfig : NavbarConfig
     , navConfig : NavConfig
+    , inputConfig : InputConfig
     }
 
 
@@ -192,6 +222,19 @@ defaultFontSize size =
 
         SizeLarge ->
             20
+
+
+
+-- based off of font sizes
+
+
+rem : Float -> (Size -> Int)
+rem scale =
+    \size ->
+        defaultFontSize size
+            |> toFloat
+            |> (*) scale
+            |> round
 
 
 defaultAlertConfig : ThemeColor -> AlertConfig
@@ -293,6 +336,36 @@ defaultNavConfig =
     }
 
 
+
+-- have to put concrete data here for now before we're able to change the Size and Role
+-- when we do just delete SizeDefault and Primary and we're good
+
+
+defaultInputConfig : ThemeColor -> InputConfig
+defaultInputConfig themeColor =
+    { fontColor = bootstrapColors.gray600
+    , fontSize = rem 1 SizeDefault
+    , paddingX = rem 0.75 SizeDefault
+    , paddingY = rem 0.375 SizeDefault
+    , borderRadius = inputBorderRadius SizeDefault
+    , borderColor = bootstrapColors.gray400
+    , focusedBorderColor = (themeColor >> lighten 0.25) Primary
+    }
+
+
+inputBorderRadius : Size -> Int
+inputBorderRadius size =
+    case size of
+        SizeLarge ->
+            rem 0.3 size
+
+        SizeDefault ->
+            rem 0.25 size
+
+        SizeSmall ->
+            rem 0.2 size
+
+
 defaultThemeConfig : ThemeConfig
 defaultThemeConfig =
     let
@@ -310,4 +383,5 @@ defaultThemeConfig =
     , dropdownConfig = defaultDropdownConfig
     , navConfig = defaultNavConfig
     , navbarConfig = defaultNavbarConfig
+    , inputConfig = defaultInputConfig themeColor
     }
