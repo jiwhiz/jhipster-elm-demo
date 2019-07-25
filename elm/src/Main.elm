@@ -1,7 +1,5 @@
 module Main exposing (AppState(..), Flags, Model, Msg(..), WindowSize, getReady, getUserLanguage, handleStorageEvent, handleWindowSize, init, logError, main, subscriptions, update, updateJwtToken, updateRouter, updateTime, updateTimeZone, view, withErrorLog)
 
-import Api.Data.User exposing (User)
-import Api.Request.Account exposing (getCurrentAccount)
 import Browser
 import Browser.Events
 import Browser.Navigation
@@ -10,6 +8,8 @@ import Html
 import I18n exposing (Language(..), languageFromCode)
 import Json.Decode as Decode
 import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import Modules.Shared.Api.Request exposing (getCurrentAccount)
+import Modules.Shared.Api.User exposing (User)
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
 import RouterView

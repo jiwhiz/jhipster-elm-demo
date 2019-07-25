@@ -1,13 +1,13 @@
 module Modules.Login.Login exposing (Model, Msg(..), Values, init, update, view)
 
-import Api.Data.JWTToken exposing (JWT)
-import Api.Request.Auth exposing (authenticationPost)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
 import Form exposing (Form)
 import Form.View
 import I18n exposing (Language(..))
+import Modules.Login.Api.JWTToken exposing (JWT)
+import Modules.Login.Api.Request exposing (authenticate)
 import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
@@ -80,7 +80,7 @@ update sharedState msg model =
 
                 _ ->
                     ( { model | state = Form.View.Loading }
-                    , authenticationPost loginVM LoginResponse
+                    , authenticate loginVM LoginResponse
                     , NoUpdate
                     )
 

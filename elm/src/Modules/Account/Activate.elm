@@ -1,9 +1,9 @@
 module Modules.Account.Activate exposing (Model, Msg(..), init, update, view)
 
-import Api.Request.Account exposing (activateAccount)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
 import Http
+import Modules.Account.Api.Request exposing (activateAccount)
 import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)

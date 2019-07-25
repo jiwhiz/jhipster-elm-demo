@@ -1,6 +1,5 @@
 module Modules.Home.Home exposing (Model, Msg(..), init, update, view)
 
-import Api.Data.User exposing (User)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (DeviceClass(..), Element, Orientation(..), alignTop, el, fill, fillPortion, height, link, paddingXY, spacing, text, width)
 import Element.Font as Font
@@ -8,6 +7,7 @@ import Html
 import Html.Attributes
 import Modules.Home.I18n.Phrases as HomePhrases
 import Modules.Home.I18n.Translator exposing (translator)
+import Modules.Shared.Api.User exposing (User)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)

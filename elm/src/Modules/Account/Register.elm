@@ -1,12 +1,12 @@
 module Modules.Account.Register exposing (Model, Msg(..), Values, content, form, init, update, view)
 
-import Api.Request.Account exposing (registerAccount)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
 import Form exposing (Form)
 import Form.View
 import Http
 import I18n exposing (Language(..))
+import Modules.Account.Api.Request exposing (registerAccount)
 import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
