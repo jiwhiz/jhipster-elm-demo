@@ -1,4 +1,4 @@
-module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig, rem)
+module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig)
 
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import Element.Font as Font
@@ -101,24 +101,6 @@ type alias DropdownConfig =
     , borderWidth : Int
     , borderRadius : Int
     }
-
-
-
-{--
--- we don't have a Config record to pump through out InputConfig function yet so we cannot do this yet
--- we'll just have to stick with the default configs (primary colour and default size)
-
-type alias InputConfig =
-    { fontColor : Color 
-    , fontSize : Size -> Int 
-    . paddingX : Size -> Int 
-    , paddingY : Size -> Int 
-    , borderRadius : Size -> Int 
-    , borderColor : Role -> Color
-    , focusedBorderColor : Color 
-    }
-
---}
 
 
 type alias InputConfig =
@@ -224,19 +206,6 @@ defaultFontSize size =
             20
 
 
-
--- multiply by default font size to get size in px
-
-
-rem : Float -> (Size -> Int)
-rem scale =
-    \size ->
-        defaultFontSize size
-            |> toFloat
-            |> (*) scale
-            |> round
-
-
 defaultAlertConfig : ThemeColor -> AlertConfig
 defaultAlertConfig themeColor =
     { paddingX = 20
@@ -253,8 +222,28 @@ defaultAlertConfig themeColor =
 
 defaultButtonConfig : ThemeColor -> ButtonConfig
 defaultButtonConfig themeColor =
-    { paddingX = rem 0.75
-    , paddingY = rem 0.375
+    { paddingX =
+        \size ->
+            case size of
+                SizeSmall ->
+                    8
+
+                SizeDefault ->
+                    12
+
+                SizeLarge ->
+                    16
+    , paddingY =
+        \size ->
+            case size of
+                SizeSmall ->
+                    4
+
+                SizeDefault ->
+                    6
+
+                SizeLarge ->
+                    8
     , backgroundColor = themeColor
     , fontColor =
         \role ->
@@ -264,7 +253,17 @@ defaultButtonConfig themeColor =
     , borderWidth =
         \size ->
             1
-    , borderRadius = rem 0.25
+    , borderRadius =
+        \size ->
+            case size of
+                SizeSmall ->
+                    3
+
+                SizeDefault ->
+                    4
+
+                SizeLarge ->
+                    5
     }
 
 
@@ -306,34 +305,16 @@ defaultNavConfig =
     }
 
 
-
--- have to put concrete data here for now before we're able to change the Size and Role
--- when we do just delete SizeDefault and Primary and we're good
-
-
 defaultInputConfig : ThemeColor -> InputConfig
 defaultInputConfig themeColor =
     { fontColor = bootstrapColors.gray600
-    , fontSize = rem 1 SizeDefault
-    , paddingX = rem 0.75 SizeDefault
-    , paddingY = rem 0.375 SizeDefault
-    , borderRadius = inputBorderRadius SizeDefault
+    , fontSize = defaultFontSize SizeDefault
+    , paddingX = 12
+    , paddingY = 6
+    , borderRadius = 4
     , borderColor = bootstrapColors.gray400
     , focusedBorderColor = (themeColor >> lighten 0.25) Primary
     }
-
-
-inputBorderRadius : Size -> Int
-inputBorderRadius size =
-    case size of
-        SizeLarge ->
-            rem 0.3 size
-
-        SizeDefault ->
-            rem 0.25 size
-
-        SizeSmall ->
-            rem 0.2 size
 
 
 defaultThemeConfig : ThemeConfig
