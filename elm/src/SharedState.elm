@@ -9,6 +9,7 @@ import Time exposing (Posix, Zone)
 import Toasty.Defaults
 import UiFramework.Configuration exposing (ThemeConfig)
 
+
 type alias SharedState =
     { navKey : Browser.Navigation.Key
     , currentTime : Maybe Posix
@@ -59,7 +60,7 @@ update sharedState sharedStateUpdate =
                 , language = languageFromCode user.languageKey
             }
 
-        UpdateJwtToken maybeJwt rememberMe ->
+        UpdateJwtToken maybeJwt _ ->
             case maybeJwt of
                 Nothing ->
                     { sharedState | jwtToken = Nothing, user = Nothing }

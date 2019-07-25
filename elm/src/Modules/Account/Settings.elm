@@ -3,7 +3,7 @@ module Modules.Account.Settings exposing (Model, Msg(..), Values, content, form,
 import Api.Data.Settings exposing (Settings)
 import Api.Request.Account exposing (updateSettings)
 import Browser.Navigation exposing (pushUrl)
-import Element exposing (..)
+import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
 import Form exposing (Form)
 import Form.View
 import Http

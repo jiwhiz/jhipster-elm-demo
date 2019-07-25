@@ -3,7 +3,7 @@ module Modules.Login.Login exposing (Model, Msg(..), Values, init, update, view)
 import Api.Data.JWTToken exposing (JWT)
 import Api.Request.Auth exposing (authenticationPost)
 import Browser.Navigation exposing (pushUrl)
-import Element exposing (..)
+import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
 import Form exposing (Form)
 import Form.View
@@ -84,7 +84,7 @@ update sharedState msg model =
                     , NoUpdate
                     )
 
-        LoginResponse (RemoteData.Failure err) ->
+        LoginResponse (RemoteData.Failure _) ->
             ( { model | state = Form.View.Error (translate LoginPhrases.FailedLogin) }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate LoginPhrases.Error) (translate LoginPhrases.FailedLogin)
@@ -110,10 +110,6 @@ update sharedState msg model =
 
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
-    let
-        translate =
-            translator sharedState.language
-    in
     ( "Login"
     , toElement (toContext sharedState) (content model)
     )

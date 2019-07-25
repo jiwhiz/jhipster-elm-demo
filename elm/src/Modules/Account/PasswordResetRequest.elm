@@ -2,7 +2,7 @@ module Modules.Account.PasswordResetRequest exposing (Model, Msg(..), Values, co
 
 import Api.Request.Account exposing (requestResetPassword)
 import Browser.Navigation exposing (pushUrl)
-import Element exposing (..)
+import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
 import Form exposing (Form)
 import Form.View

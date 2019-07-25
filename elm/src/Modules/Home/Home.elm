@@ -2,7 +2,7 @@ module Modules.Home.Home exposing (Model, Msg(..), init, update, view)
 
 import Api.Data.User exposing (User)
 import Browser.Navigation exposing (pushUrl)
-import Element exposing (..)
+import Element exposing (DeviceClass(..), Element, Orientation(..), alignTop, el, fill, fillPortion, height, link, paddingXY, spacing, text, width)
 import Element.Font as Font
 import Html
 import Html.Attributes
@@ -115,25 +115,24 @@ content =
                 hipsterImg =
                     fromElement
                         (\_ ->
-                            el 
+                            el
                                 [ width fill
                                 , height fill
                                 ]
                                 (Html.img [ Html.Attributes.src "/images/jhipster_family_member_2.svg" ] []
                                     |> Element.html
                                 )
-
                         )
-            
             in
             if context.device.class == Phone then
-                uiColumn 
+                uiColumn
                     [ width fill
                     , height fill
                     , paddingXY 5 10
                     , spacing 20
                     ]
-                    ( homeInfo ++ [ hipsterImg ] )
+                    (homeInfo ++ [ hipsterImg ])
+
             else
                 uiRow
                     [ width fill, height fill ]

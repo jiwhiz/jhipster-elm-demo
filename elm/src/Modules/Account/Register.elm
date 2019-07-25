@@ -2,7 +2,7 @@ module Modules.Account.Register exposing (Model, Msg(..), Values, content, form,
 
 import Api.Request.Account exposing (registerAccount)
 import Browser.Navigation exposing (pushUrl)
-import Element exposing (..)
+import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
 import Form exposing (Form)
 import Form.View
 import Http
@@ -86,7 +86,6 @@ update sharedState msg model =
                         Http.BadStatus 400 ->
                             translate AccountPhrases.RegistrationFailed
 
-                        -- TODO display error msg from server
                         _ ->
                             translate AccountPhrases.ServerError
             in

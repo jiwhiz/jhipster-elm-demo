@@ -6,7 +6,6 @@ import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
 import SharedState exposing (SharedState)
 import UiFramework exposing (UiContextual, WithContext, uiText)
-import UiFramework.Colors as Colors
 
 
 type alias Context =
