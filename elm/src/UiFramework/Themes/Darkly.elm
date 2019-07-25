@@ -69,21 +69,34 @@ alertConfig themeColor =
             defaultAlertConfig themeColor
     in
     { default
-    | backgroundColor = themeColor
-    , fontColor = \_ -> darklyColors.white
-    , linkFontColor = \_ -> darklyColors.white
-    , fontSize = defaultFontSize
-    , borderColor = themeColor
-    , borderWidth = \size -> 1
-    , borderRadius = \size -> 4
+        | backgroundColor = themeColor
+        , fontColor = \_ -> darklyColors.white
+        , linkFontColor = \_ -> darklyColors.white
+        , fontSize = defaultFontSize
+        , borderColor = themeColor
+        , borderWidth = \size -> 1
+        , borderRadius = \size -> 4
     }
+
 
 dropdownConfig : DropdownConfig
 dropdownConfig =
     { defaultDropdownConfig
-    | backgroundColor = darklyColors.gray900
-    , fontColor = darklyColors.white
-    , borderColor = darklyColors.gray700
+        | backgroundColor = darklyColors.gray900
+        , fontColor = darklyColors.white
+        , borderColor = darklyColors.gray700
+    }
+
+
+darklyInputConfig : ThemeColor -> InputConfig
+darklyInputConfig themeColor =
+    let
+        default =
+            defaultInputConfig themeColor
+    in
+    { default
+        | fontColor = bootstrapColors.gray700
+        , borderColor = transparent
     }
 
 
@@ -104,4 +117,5 @@ darklyThemeConfig =
     , dropdownConfig = dropdownConfig
     , navConfig = defaultNavConfig
     , navbarConfig = defaultNavbarConfig
+    , inputConfig = darklyInputConfig themeColor
     }

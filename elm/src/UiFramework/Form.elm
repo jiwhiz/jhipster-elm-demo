@@ -117,7 +117,7 @@ inputField input { onChange, onBlur, disabled, value, error, showError, attribut
     Internal.fromElement
         (\context ->
             input
-                ([]
+                (viewAttributes context
                     |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
@@ -133,7 +133,7 @@ passwordField { onChange, onBlur, disabled, value, error, showError, attributes 
     Internal.fromElement
         (\context ->
             Input.currentPassword
-                ([]
+                (viewAttributes context
                     |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
@@ -150,7 +150,8 @@ textareaField { onChange, onBlur, disabled, value, error, showError, attributes 
     Internal.fromElement
         (\context ->
             Input.multiline
-                ([ height shrink ]
+                (viewAttributes context
+                    |> withAttribute (height shrink)
                     |> withCommonAttrs showError error disabled onBlur context.themeConfig.themeColor
                 )
                 { onChange = onChange
@@ -167,7 +168,7 @@ numberField { onChange, onBlur, disabled, value, error, showError, attributes } 
     Internal.fromElement
         (\context ->
             Input.text
-                ([]
+                (viewAttributes context
                     |> withHtmlAttribute Html.Attributes.type_ (Just "number")
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.step) (Just attributes.step)
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.max) attributes.max
@@ -187,7 +188,7 @@ rangeField { onChange, onBlur, disabled, value, error, showError, attributes } =
     Internal.fromElement
         (\context ->
             Input.text
-                ([]
+                (viewAttributes context
                     |> withHtmlAttribute Html.Attributes.type_ (Just "range")
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.step) (Just attributes.step)
                     |> withHtmlAttribute (String.fromFloat >> Html.Attributes.max) attributes.max
@@ -362,6 +363,28 @@ fieldError themeColor error =
 
 
 -- Helpers
+
+
+viewAttributes : Internal.UiContextual context -> List (Attribute msg)
+viewAttributes context =
+    let
+        config =
+            context.themeConfig.inputConfig
+    in
+    [ paddingXY config.paddingX config.paddingY
+    , Font.size <| config.fontSize
+    , Font.color <| config.fontColor
+    , Border.rounded <| config.borderRadius
+    , Border.width <| 1
+    , Border.solid
+    , Border.color <| config.borderColor
+    , focused [ Border.color <| config.focusedBorderColor ]
+    ]
+
+
+withAttribute : Attribute msg -> List (Attribute msg) -> List (Attribute msg)
+withAttribute attr list =
+    attr :: list
 
 
 fromString : (String -> Maybe a) -> Maybe a -> String -> Maybe a

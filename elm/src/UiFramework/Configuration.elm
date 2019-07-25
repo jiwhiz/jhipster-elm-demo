@@ -1,4 +1,4 @@
-module UiFramework.Configuration exposing (..)
+module UiFramework.Configuration exposing (AlertConfig, ButtonConfig, Colors, DropdownConfig, FontConfig, InputConfig, NavConfig, NavbarConfig, ThemeColor, ThemeConfig, bootstrapColors, bootstrapThemeColor, defaultAlertConfig, defaultButtonConfig, defaultDropdownConfig, defaultFontConfig, defaultFontSize, defaultInputConfig, defaultNavConfig, defaultNavbarConfig, defaultThemeConfig)
 
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import Element.Font as Font
@@ -103,6 +103,17 @@ type alias DropdownConfig =
     }
 
 
+type alias InputConfig =
+    { fontColor : Color
+    , fontSize : Int
+    , paddingX : Int
+    , paddingY : Int
+    , borderRadius : Int
+    , borderColor : Color
+    , focusedBorderColor : Color
+    }
+
+
 type alias ThemeConfig =
     { colors : Colors
     , themeColor : ThemeColor
@@ -115,6 +126,7 @@ type alias ThemeConfig =
     , dropdownConfig : DropdownConfig
     , navbarConfig : NavbarConfig
     , navConfig : NavConfig
+    , inputConfig : InputConfig
     }
 
 
@@ -293,6 +305,18 @@ defaultNavConfig =
     }
 
 
+defaultInputConfig : ThemeColor -> InputConfig
+defaultInputConfig themeColor =
+    { fontColor = bootstrapColors.gray600
+    , fontSize = defaultFontSize SizeDefault
+    , paddingX = 12
+    , paddingY = 6
+    , borderRadius = 4
+    , borderColor = bootstrapColors.gray400
+    , focusedBorderColor = (themeColor >> lighten 0.25) Primary
+    }
+
+
 defaultThemeConfig : ThemeConfig
 defaultThemeConfig =
     let
@@ -310,4 +334,5 @@ defaultThemeConfig =
     , dropdownConfig = defaultDropdownConfig
     , navConfig = defaultNavConfig
     , navbarConfig = defaultNavbarConfig
+    , inputConfig = defaultInputConfig themeColor
     }
