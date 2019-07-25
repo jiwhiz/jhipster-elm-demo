@@ -47,11 +47,11 @@ import Modules.Shared.I18n.Translator exposing (translator)
 import Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..))
 import Routes exposing (Route(..))
 import SharedState exposing (SharedState, SharedStateUpdate(..))
+import Themes.Darkly exposing (darklyThemeConfig)
 import UiFramework exposing (toElement)
 import UiFramework.Colors as Colors
 import UiFramework.Configuration exposing (defaultThemeConfig)
 import UiFramework.Navbar as Navbar
-import UiFramework.Themes.Darkly exposing (darklyThemeConfig)
 import UiFramework.Toasty
 
 

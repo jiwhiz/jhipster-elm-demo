@@ -1,4 +1,4 @@
-module UiFramework.Themes.Darkly exposing (darklyThemeConfig)
+module Themes.Darkly exposing (darklyThemeConfig)
 
 import Element exposing (Color, fromRgb, rgb255, rgba, toRgb)
 import Element.Font as Font
