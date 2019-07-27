@@ -4,10 +4,10 @@ import Element exposing (Element, fill, height, paddingXY, width)
 import LocalStorage exposing (jwtAuthenticationTokenKey)
 import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
+import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (toElement, uiColumn)
 import UiFramework.Alert as Alert
-import UiFramework.Padding
 import UiFramework.Types exposing (Role(..))
 
 
@@ -53,4 +53,4 @@ content =
             |> Alert.withChild (tt LoginPhrases.LogoutTitle)
             |> Alert.view
         ]
-        |> UiFramework.Padding.responsive
+        |> wrapContent

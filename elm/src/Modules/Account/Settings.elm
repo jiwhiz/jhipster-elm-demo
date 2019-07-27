@@ -11,13 +11,13 @@ import Modules.Account.Api.Request exposing (updateSettings)
 import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
+import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
 import UiFramework.Form
-import UiFramework.Padding
 import UiFramework.Typography exposing (h1)
 
 
@@ -139,7 +139,7 @@ content username model =
                     model
             )
         ]
-        |> UiFramework.Padding.responsive
+        |> wrapContent
 
 
 form : Language -> Form Values Msg

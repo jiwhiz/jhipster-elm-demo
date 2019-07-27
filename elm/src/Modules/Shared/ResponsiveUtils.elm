@@ -1,4 +1,4 @@
-module UiFramework.Padding exposing (responsive)
+module Modules.Shared.ResponsiveUtils exposing (wrapContent)
 
 {-
    Responsive padding using fillPortion
@@ -29,8 +29,8 @@ Each "padding," which is just Element.none to display nothing, will be half the 
      If you want 0 padding, just put 0 in the respective position
 
 -}
-responsive : UiElement context msg -> UiElement context msg
-responsive content =
+wrapContent : UiElement context msg -> UiElement context msg
+wrapContent content =
     Internal.fromElement
         (\context ->
             let

@@ -11,6 +11,7 @@ import Modules.Login.Api.Request exposing (authenticate)
 import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
+import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import SharedState exposing (SharedState, SharedStateUpdate(..))
@@ -18,8 +19,7 @@ import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Form
-import UiFramework.Padding
-import UiFramework.Types exposing (Role(..), ScreenSize(..))
+import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
 
@@ -137,7 +137,7 @@ content model =
                         loginForm model
             )
         ]
-        |> UiFramework.Padding.responsive
+        |> wrapContent
 
 
 loginForm : Model -> UiElement Msg
