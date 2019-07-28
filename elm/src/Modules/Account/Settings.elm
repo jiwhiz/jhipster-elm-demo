@@ -1,16 +1,15 @@
-module Modules.Account.Settings exposing (Model, Msg(..), Values, content, form, init, update, view)
+module Modules.Account.Settings exposing (Model, Msg(..), init, update, view)
 
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
-import Form exposing (Form)
+import Form
 import Form.View
 import Http
 import LocalStorage exposing (Event(..))
 import Modules.Account.Api.Request exposing (updateSettings)
-import Modules.Account.Common exposing (UiElement, toContext, tt)
+import Modules.Account.Common exposing (UiElement, sharedForms, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
-import Modules.Shared.I18n exposing (Language(..), languageCode, languageName, supportLanguages)
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import RemoteData exposing (RemoteData(..), WebData)
@@ -129,75 +128,23 @@ content username model =
                 AccountPhrases.SettingsTitle username
         , flatMap
             (\context ->
+                let
+                    fields =
+                        sharedForms context
+                in
                 UiFramework.Form.layout
                     { onChange = FormChanged
                     , action = context.translate AccountPhrases.SaveButtonLabel
                     , loading = context.translate AccountPhrases.SaveButtonLoading
                     , validation = Form.View.ValidateOnSubmit
                     }
-                    (form context.language)
+                    (Form.succeed SaveSettings
+                        |> Form.append fields.firstNameField
+                        |> Form.append fields.lastNameField
+                        |> Form.append fields.emailField
+                        |> Form.append fields.languageField
+                    )
                     model
             )
         ]
         |> wrapContent
-
-
-form : Language -> Form Values Msg
-form language =
-    let
-        translate =
-            translator language
-
-        firstNameField =
-            Form.textField
-                { parser = Ok
-                , value = .firstName
-                , update = \value values -> { values | firstName = value }
-                , attributes =
-                    { label = translate AccountPhrases.FirstnameLabel
-                    , placeholder = translate AccountPhrases.FirstnamePlaceholder
-                    }
-                }
-
-        lastNameField =
-            Form.textField
-                { parser = Ok
-                , value = .lastName
-                , update = \value values -> { values | lastName = value }
-                , attributes =
-                    { label = translate AccountPhrases.LastnameLabel
-                    , placeholder = translate AccountPhrases.LastnamePlaceholder
-                    }
-                }
-
-        emailField =
-            Form.textField
-                { parser = Ok
-                , value = .email
-                , update = \value values -> { values | email = value }
-                , attributes =
-                    { label = translate AccountPhrases.EmailLabel
-                    , placeholder = translate AccountPhrases.EmailPlaceholder
-                    }
-                }
-
-        languageField =
-            Form.selectField
-                { parser = Ok
-                , value = .languageKey
-                , update = \value values -> { values | languageKey = value }
-                , attributes =
-                    { label = translate AccountPhrases.LanguageLabel
-                    , placeholder = " - select language -"
-                    , options =
-                        List.map
-                            (\lang -> ( languageCode lang, languageName lang ))
-                            supportLanguages
-                    }
-                }
-    in
-    Form.succeed SaveSettings
-        |> Form.append firstNameField
-        |> Form.append lastNameField
-        |> Form.append emailField
-        |> Form.append languageField

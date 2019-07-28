@@ -1,15 +1,14 @@
-module Modules.Account.Register exposing (Model, Msg(..), Values, content, form, init, update, view)
+module Modules.Account.Register exposing (Model, Msg(..), init, update, view)
 
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
-import Form exposing (Form)
+import Form
 import Form.View
 import Http
 import Modules.Account.Api.Request exposing (registerAccount)
-import Modules.Account.Common exposing (UiElement, toContext, tt)
+import Modules.Account.Common exposing (UiElement, sharedForms, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
-import Modules.Shared.I18n exposing (Language(..), languageCode, languageName, supportLanguages)
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
@@ -127,101 +126,27 @@ content model =
             tt AccountPhrases.RegisterTitle
         , flatMap
             (\context ->
+                let
+                    fields =
+                        sharedForms context
+                in
                 UiFramework.Form.layout
                     { onChange = FormChanged
                     , action = context.translate AccountPhrases.RegisterButtonLabel
                     , loading = context.translate AccountPhrases.RegisterButtonLoading
                     , validation = Form.View.ValidateOnSubmit
                     }
-                    (form context.language)
+                    (Form.succeed Register
+                        |> Form.append fields.usernameField
+                        |> Form.append fields.emailField
+                        |> Form.append
+                            (Form.succeed (\password _ -> password)
+                                |> Form.append fields.passwordField
+                                |> Form.append fields.repeatPasswordField
+                            )
+                        |> Form.append fields.languageField
+                    )
                     model
             )
         ]
         |> wrapContent
-
-
-form : Language -> Form Values Msg
-form language =
-    let
-        translate =
-            translator language
-
-        usernameField =
-            Form.textField
-                { parser = Ok
-                , value = .username
-                , update = \value values -> { values | username = value }
-                , attributes =
-                    { label = translate AccountPhrases.UsernameLabel
-                    , placeholder = translate AccountPhrases.UsernamePlaceholder
-                    }
-                }
-
-        emailField =
-            Form.textField
-                { parser = Ok
-                , value = .email
-                , update = \value values -> { values | email = value }
-                , attributes =
-                    { label = translate AccountPhrases.EmailLabel
-                    , placeholder = translate AccountPhrases.EmailPlaceholder
-                    }
-                }
-
-        passwordField =
-            Form.passwordField
-                { parser = Ok
-                , value = .password
-                , update = \value values -> { values | password = value }
-                , attributes =
-                    { label = translate AccountPhrases.NewPasswordLabel
-                    , placeholder = translate AccountPhrases.NewPasswordPlaceholder
-                    }
-                }
-
-        repeatPasswordField =
-            Form.meta
-                (\values ->
-                    Form.passwordField
-                        { parser =
-                            \value ->
-                                if value == values.password then
-                                    Ok ()
-
-                                else
-                                    Err <| translate AccountPhrases.PasswordNotMatch
-                        , value = .repeatPassword
-                        , update =
-                            \newValue values_ ->
-                                { values_ | repeatPassword = newValue }
-                        , attributes =
-                            { label = translate AccountPhrases.ConfirmPasswordLabel
-                            , placeholder = translate AccountPhrases.ConfirmPasswordPlaceholder
-                            }
-                        }
-                )
-
-        languageField =
-            Form.selectField
-                { parser = Ok
-                , value = .languageKey
-                , update = \value values -> { values | languageKey = value }
-                , attributes =
-                    { label = translate AccountPhrases.LanguageLabel
-                    , placeholder = " - select language -"
-                    , options =
-                        List.map
-                            (\lang -> ( languageCode lang, languageName lang ))
-                            supportLanguages
-                    }
-                }
-    in
-    Form.succeed Register
-        |> Form.append usernameField
-        |> Form.append emailField
-        |> Form.append
-            (Form.succeed (\password _ -> password)
-                |> Form.append passwordField
-                |> Form.append repeatPasswordField
-            )
-        |> Form.append languageField

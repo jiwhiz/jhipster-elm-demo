@@ -1,16 +1,15 @@
-module Modules.Account.PasswordResetRequest exposing (Model, Msg(..), Values, content, form, init, update, view)
+module Modules.Account.PasswordResetRequest exposing (Model, Msg(..), init, update, view)
 
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form exposing (Form)
+import Form
 import Form.View
 import Http
 import Modules.Account.Api.Request exposing (requestResetPassword)
-import Modules.Account.Common exposing (UiElement, toContext, tt)
+import Modules.Account.Common exposing (UiElement, sharedForms, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
-import Modules.Shared.I18n exposing (Language(..))
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
@@ -125,35 +124,20 @@ content model =
             tt AccountPhrases.ResetPasswordInfo
         , flatMap
             (\context ->
+                let
+                    fields =
+                        sharedForms context
+                in
                 UiFramework.Form.layout
                     { onChange = FormChanged
                     , action = context.translate AccountPhrases.ResetButtonLabel
                     , loading = context.translate AccountPhrases.ResetButtonLoading
                     , validation = Form.View.ValidateOnSubmit
                     }
-                    (form context.language)
+                    (Form.succeed ResetRequest
+                        |> Form.append fields.emailField
+                    )
                     model
             )
         ]
         |> wrapContent
-
-
-form : Language -> Form Values Msg
-form language =
-    let
-        translate =
-            translator language
-
-        emailField =
-            Form.textField
-                { parser = Ok
-                , value = .email
-                , update = \value values -> { values | email = value }
-                , attributes =
-                    { label = translate AccountPhrases.EmailLabel
-                    , placeholder = translate AccountPhrases.EmailPlaceholder
-                    }
-                }
-    in
-    Form.succeed ResetRequest
-        |> Form.append emailField

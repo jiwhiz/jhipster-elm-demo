@@ -1,16 +1,15 @@
-module Modules.Account.PasswordUpdate exposing (Model, Msg(..), Values, content, form, init, update, view)
+module Modules.Account.PasswordUpdate exposing (Model, Msg(..), init, update, view)
 
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form exposing (Form)
+import Form
 import Form.View
 import Http
 import Modules.Account.Api.Request exposing (updatePassword)
-import Modules.Account.Common exposing (UiElement, toContext, tt)
+import Modules.Account.Common exposing (UiElement, sharedForms, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
-import Modules.Shared.I18n exposing (Language(..))
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
 import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import RemoteData exposing (RemoteData(..), WebData)
@@ -128,73 +127,25 @@ content username model =
                 AccountPhrases.UpdatePasswordTitle username
         , flatMap
             (\context ->
+                let
+                    fields =
+                        sharedForms context
+                in
                 UiFramework.Form.layout
                     { onChange = FormChanged
                     , action = context.translate AccountPhrases.SaveButtonLabel
                     , loading = context.translate AccountPhrases.SaveButtonLoading
                     , validation = Form.View.ValidateOnSubmit
                     }
-                    (form context.language)
+                    (Form.succeed ChangePassword
+                        |> Form.append fields.currentPasswordField
+                        |> Form.append
+                            (Form.succeed (\password _ -> password)
+                                |> Form.append fields.passwordField
+                                |> Form.append fields.repeatPasswordField
+                            )
+                    )
                     model
             )
         ]
         |> wrapContent
-
-
-form : Language -> Form Values Msg
-form language =
-    let
-        translate =
-            translator language
-
-        currentPasswordField =
-            Form.passwordField
-                { parser = Ok
-                , value = .currentPassword
-                , update = \value values -> { values | currentPassword = value }
-                , attributes =
-                    { label = translate AccountPhrases.CurrentPasswordLabel
-                    , placeholder = translate AccountPhrases.CurrentPasswordPlaceholder
-                    }
-                }
-
-        passwordField =
-            Form.passwordField
-                { parser = Ok
-                , value = .password
-                , update = \value values -> { values | password = value }
-                , attributes =
-                    { label = translate AccountPhrases.NewPasswordLabel
-                    , placeholder = translate AccountPhrases.NewPasswordPlaceholder
-                    }
-                }
-
-        repeatPasswordField =
-            Form.meta
-                (\values ->
-                    Form.passwordField
-                        { parser =
-                            \value ->
-                                if value == values.password then
-                                    Ok ()
-
-                                else
-                                    Err <| translate AccountPhrases.PasswordNotMatch
-                        , value = .repeatPassword
-                        , update =
-                            \newValue values_ ->
-                                { values_ | repeatPassword = newValue }
-                        , attributes =
-                            { label = translate AccountPhrases.ConfirmPasswordLabel
-                            , placeholder = translate AccountPhrases.ConfirmPasswordPlaceholder
-                            }
-                        }
-                )
-    in
-    Form.succeed ChangePassword
-        |> Form.append currentPasswordField
-        |> Form.append
-            (Form.succeed (\password _ -> password)
-                |> Form.append passwordField
-                |> Form.append repeatPasswordField
-            )
