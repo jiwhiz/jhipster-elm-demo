@@ -1,7 +1,38 @@
-module Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..), init, initWith, subscriptions, update)
+module Router exposing (Model, Msg(..), init, subscriptions, update, view)
 
+import Browser
 import Browser.Events as Events
 import Browser.Navigation
+import Element
+    exposing
+        ( DeviceClass(..)
+        , Element
+        , Orientation(..)
+        , alignBottom
+        , centerY
+        , column
+        , el
+        , fill
+        , height
+        , html
+        , image
+        , inFront
+        , padding
+        , paddingEach
+        , paddingXY
+        , paragraph
+        , px
+        , rgb255
+        , row
+        , text
+        , width
+        )
+import Element.Background as Background
+import Element.Font as Font
+import FontAwesome.Brands
+import FontAwesome.Solid
+import FontAwesome.Styles
+import Html
 import Json.Decode as Json
 import LocalStorage exposing (Event(..))
 import Modules.Account.Activate as Activate
@@ -18,13 +49,20 @@ import Modules.Shared.Api.Request exposing (getCurrentAccount)
 import Modules.Shared.Api.User exposing (User)
 import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
 import Modules.Shared.I18n as I18n
+import Modules.Shared.I18n.Phrases as GlobalPhrases
+import Modules.Shared.I18n.Translator exposing (translator)
 import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), fromUrl, routeToUrlString)
 import Task
+import Themes.Darkly exposing (darklyThemeConfig)
 import Toasty
 import Toasty.Defaults
-import UiFramework.Configuration exposing (ThemeConfig)
+import UiFramework exposing (toElement)
+import UiFramework.Colors as Colors
+import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
+import UiFramework.Navbar as Navbar
+import UiFramework.Toasty
 import Url exposing (Url)
 import Utils
 
@@ -353,3 +391,192 @@ initWith toPage toMsg model sharedStateUpdate ( subModel, subCmd ) =
     , Cmd.map toMsg subCmd
     , sharedStateUpdate
     )
+
+
+view : (Msg -> msg) -> SharedState -> Model -> Browser.Document msg
+view msgMapper sharedState model =
+    let
+        ( title, body ) =
+            case model.currentPage of
+                NotFoundPage pageModel ->
+                    NotFound.view sharedState pageModel |> transform NotFoundMsg
+
+                HomePage pageModel ->
+                    Home.view sharedState pageModel |> transform HomeMsg
+
+                LoginPage pageModel ->
+                    Login.view sharedState pageModel |> transform LoginMsg
+
+                LogoutPage pageModel ->
+                    Logout.view sharedState pageModel |> transform LogoutMsg
+
+                RegisterPage pageModel ->
+                    Register.view sharedState pageModel |> transform RegisterMsg
+
+                PasswordResetRequestPage pageModel ->
+                    PasswordResetRequest.view sharedState pageModel |> transform PasswordResetRequestMsg
+
+                PasswordResetFinishPage pageModel ->
+                    PasswordResetFinish.view sharedState pageModel |> transform PasswordResetFinishMsg
+
+                SettingsPage pageModel ->
+                    Settings.view sharedState pageModel |> transform SettingsMsg
+
+                PasswordUpdatePage pageModel ->
+                    PasswordUpdate.view sharedState pageModel |> transform PasswordUpdateMsg
+
+                ActivatePage pageModel ->
+                    Activate.view sharedState pageModel |> transform ActivateMsg
+
+        navbarState =
+            { toggleMenuState = model.toggleMenuState
+            , dropdownState = model.dropdownMenuState
+            }
+
+        pageLayout content =
+            Element.layout []
+                (column
+                    [ width fill
+                    , height fill
+                    , inFront <| UiFramework.Toasty.view ToastyMsg model.toasties
+                    ]
+                    [ FontAwesome.Styles.css |> html
+                    , header sharedState navbarState
+                    , el
+                        [ height fill
+                        , width fill
+                        , Background.color sharedState.themeConfig.bodyBackground
+                        , Font.color <| sharedState.themeConfig.fontColor sharedState.themeConfig.bodyBackground
+                        ]
+                        content
+                    , footer sharedState
+                    ]
+                )
+
+        transform toMsg =
+            Tuple.mapSecond (Element.map toMsg)
+                >> Tuple.mapSecond pageLayout
+    in
+    { title = "jHipster Elm Demo - " ++ title
+    , body = List.singleton (Html.map msgMapper body)
+    }
+
+
+header : SharedState -> Navbar.NavbarState DropdownMenuState -> Element Msg
+header sharedState navbarState =
+    let
+        context =
+            { device = sharedState.device
+            , themeConfig = sharedState.themeConfig
+            , parentRole = Nothing
+            , state = navbarState
+            }
+
+        translate =
+            translator sharedState.language
+
+        brand =
+            row []
+                [ image [ height (px 45) ] { src = "/logo-jhipster.png", description = "Logo" }
+                , row [ centerY ]
+                    [ el
+                        [ padding 0
+                        , alignBottom
+                        , Font.size 24
+                        , Font.bold
+                        ]
+                        (text "JelmHipster")
+                    , el
+                        [ paddingEach { top = 0, right = 0, bottom = 0, left = 10 }
+                        , alignBottom
+                        , Font.size 10
+                        ]
+                        (text "0.0.1-SNAPSHOT")
+                    ]
+                ]
+
+        homeMenuItem =
+            Navbar.linkItem (NavigateTo Home)
+                |> Navbar.withMenuIcon FontAwesome.Solid.home
+                |> Navbar.withMenuTitle (translate GlobalPhrases.MenuHome)
+
+        languageMenuItem =
+            Navbar.dropdown ToggleLanguageDropdown LanguageOpen
+                |> Navbar.withDropdownMenuItems
+                    [ Navbar.dropdownMenuLinkItem (SelectLanguage I18n.English)
+                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.English)
+                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.French)
+                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.French)
+                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.ChineseSimplified)
+                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.ChineseSimplified)
+                    ]
+                |> Navbar.DropdownItem
+                |> Navbar.withMenuIcon FontAwesome.Solid.flag
+                |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
+
+        themeMenuItem =
+            Navbar.dropdown ToggleThemeDropdown ThemeOpen
+                |> Navbar.withDropdownMenuItems
+                    [ Navbar.dropdownMenuLinkItem (SelectTheme defaultThemeConfig)
+                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuThemeBootstrap)
+                    , Navbar.dropdownMenuLinkItem (SelectTheme darklyThemeConfig)
+                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuThemeDarkly)
+                    ]
+                |> Navbar.DropdownItem
+                |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
+                |> Navbar.withMenuTitle (translate GlobalPhrases.MenuTheme)
+
+        accountMenuItem =
+            Navbar.dropdown ToggleAccountDropdown AccountOpen
+                |> Navbar.withDropdownMenuItems
+                    (case sharedState.user of
+                        Just _ ->
+                            [ Navbar.dropdownMenuLinkItem (NavigateTo Settings)
+                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.wrench
+                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountSettings)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo PasswordUpdate)
+                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.key
+                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountPassword)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo Logout)
+                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signOutAlt
+                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountLogout)
+                            ]
+
+                        Nothing ->
+                            [ Navbar.dropdownMenuLinkItem (NavigateTo Login)
+                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signInAlt
+                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountLogin)
+                            , Navbar.dropdownMenuLinkItem (NavigateTo Register)
+                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.cashRegister
+                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountRegister)
+                            ]
+                    )
+                |> Navbar.DropdownItem
+                |> Navbar.withMenuIcon FontAwesome.Solid.user
+                |> Navbar.withMenuTitle (translate GlobalPhrases.MenuAccount)
+    in
+    Navbar.default ToggleMenu
+        |> Navbar.withBrand brand
+        |> Navbar.withBackgroundColor (Colors.getColor "#353d47")
+        |> Navbar.withMenuItems
+            [ homeMenuItem
+            , languageMenuItem
+            , themeMenuItem
+            , accountMenuItem
+            ]
+        |> Navbar.view
+        |> toElement context
+
+
+footer : SharedState -> Element Msg
+footer sharedState =
+    let
+        translate =
+            translator sharedState.language
+    in
+    paragraph
+        [ paddingXY 20 10
+        , Background.color (rgb255 248 248 248)
+        , Font.size 10
+        ]
+        [ text <| translate GlobalPhrases.Footer ]

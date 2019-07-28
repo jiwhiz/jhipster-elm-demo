@@ -14,7 +14,6 @@ import Modules.Shared.I18n exposing (Language(..), languageFromCode)
 import Modules.Shared.SharedState as SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
-import RouterView
 import Task
 import Time exposing (Posix, Zone)
 import UiFramework.Configuration exposing (defaultThemeConfig)
@@ -338,7 +337,7 @@ view : Model -> Browser.Document Msg
 view model =
     case model.appState of
         Ready sharedState routerModel ->
-            RouterView.view RouterMsg sharedState routerModel
+            Router.view RouterMsg sharedState routerModel
 
         NotReady _ _ _ ->
             { title = "jHipster Elm Demo - Loading"

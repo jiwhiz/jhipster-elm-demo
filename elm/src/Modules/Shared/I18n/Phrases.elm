@@ -22,3 +22,4 @@ type Phrase
     | MenuAccountLogin
     | MenuAccountLogout
     | MenuAccountRegister
+    | Footer

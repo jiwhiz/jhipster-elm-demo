@@ -1,6 +1,7 @@
 module Modules.Shared.I18n.ChineseSimplified exposing (translate)
 
-import Modules.Shared.I18n.Phrases exposing(Phrase(..))
+import Modules.Shared.I18n.Phrases exposing (Phrase(..))
+
 
 translate : Phrase -> String
 translate phrase =
@@ -64,3 +65,6 @@ translate phrase =
 
         MenuAccountRegister ->
             "注册"
+
+        Footer ->
+            "这里是页脚"

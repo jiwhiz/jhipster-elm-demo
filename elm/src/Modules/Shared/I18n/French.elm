@@ -1,6 +1,7 @@
 module Modules.Shared.I18n.French exposing (translate)
 
-import Modules.Shared.I18n.Phrases exposing(Phrase(..))
+import Modules.Shared.I18n.Phrases exposing (Phrase(..))
+
 
 translate : Phrase -> String
 translate phrase =
@@ -64,3 +65,6 @@ translate phrase =
 
         MenuAccountRegister ->
             "Créer un compte"
+
+        Footer ->
+            "Ceci est votre pied de page"

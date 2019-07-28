@@ -1,6 +1,7 @@
 module Modules.Shared.I18n.English exposing (translate)
 
-import Modules.Shared.I18n.Phrases exposing(Phrase(..))
+import Modules.Shared.I18n.Phrases exposing (Phrase(..))
+
 
 translate : Phrase -> String
 translate phrase =
@@ -64,3 +65,6 @@ translate phrase =
 
         MenuAccountRegister ->
             "Register"
+
+        Footer ->
+            "This is your footer"
