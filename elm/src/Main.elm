@@ -7,9 +7,10 @@ import Element exposing (Device, classifyDevice)
 import Html
 import I18n exposing (Language(..), languageFromCode)
 import Json.Decode as Decode
-import LocalStorage exposing (Event(..), jwtAuthenticationTokenKey)
+import LocalStorage exposing (Event(..))
 import Modules.Shared.Api.Request exposing (getCurrentAccount)
 import Modules.Shared.Api.User exposing (User)
+import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
 import RouterView
