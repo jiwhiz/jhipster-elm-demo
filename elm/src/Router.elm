@@ -1,5 +1,11 @@
 module Router exposing (Model, Msg(..), init, subscriptions, update, view)
 
+import Account.Activate as Activate
+import Account.PasswordResetFinish as PasswordResetFinish
+import Account.PasswordResetRequest as PasswordResetRequest
+import Account.PasswordUpdate as PasswordUpdate
+import Account.Register as Register
+import Account.Settings as Settings
 import Browser
 import Browser.Events as Events
 import Browser.Navigation
@@ -29,31 +35,25 @@ import Element
         )
 import Element.Background as Background
 import Element.Font as Font
+import Error.NotFound as NotFound
 import FontAwesome.Brands
 import FontAwesome.Solid
 import FontAwesome.Styles
+import Home.Home as Home
 import Html
 import Json.Decode as Json
 import LocalStorage exposing (Event(..))
-import Modules.Account.Activate as Activate
-import Modules.Account.PasswordResetFinish as PasswordResetFinish
-import Modules.Account.PasswordResetRequest as PasswordResetRequest
-import Modules.Account.PasswordUpdate as PasswordUpdate
-import Modules.Account.Register as Register
-import Modules.Account.Settings as Settings
-import Modules.Error.NotFound as NotFound
-import Modules.Home.Home as Home
-import Modules.Login.Login as Login
-import Modules.Login.Logout as Logout
-import Modules.Shared.Api.Request exposing (getCurrentAccount)
-import Modules.Shared.Api.User exposing (User)
-import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
-import Modules.Shared.I18n as I18n
-import Modules.Shared.I18n.Phrases as GlobalPhrases
-import Modules.Shared.I18n.Translator exposing (translator)
-import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
+import Login.Login as Login
+import Login.Logout as Logout
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), fromUrl, routeToUrlString)
+import Shared.Api.Request exposing (getCurrentAccount)
+import Shared.Api.User exposing (User)
+import Shared.Constants exposing (jwtAuthenticationTokenKey)
+import Shared.I18n as I18n
+import Shared.I18n.Phrases as GlobalPhrases
+import Shared.I18n.Translator exposing (translator)
+import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Themes.Darkly exposing (darklyThemeConfig)
 import Toasty
