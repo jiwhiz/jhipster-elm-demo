@@ -2,7 +2,6 @@ module Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..), init, i
 
 import Browser.Events as Events
 import Browser.Navigation
-import I18n
 import Json.Decode as Json
 import LocalStorage exposing (Event(..))
 import Modules.Account.Activate as Activate
@@ -18,9 +17,10 @@ import Modules.Login.Logout as Logout
 import Modules.Shared.Api.Request exposing (getCurrentAccount)
 import Modules.Shared.Api.User exposing (User)
 import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
+import Modules.Shared.I18n as I18n
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), fromUrl, routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Toasty
 import Toasty.Defaults

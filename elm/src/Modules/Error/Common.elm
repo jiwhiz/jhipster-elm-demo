@@ -1,9 +1,9 @@
 module Modules.Error.Common exposing (Context, UiElement, toContext, tt)
 
-import I18n exposing (Language(..))
 import Modules.Error.I18n.Phrases as ErrorPhrases
 import Modules.Error.I18n.Translator exposing (translator)
-import SharedState exposing (SharedState)
+import Modules.Shared.I18n exposing (Language(..))
+import Modules.Shared.SharedState exposing (SharedState)
 import UiFramework exposing (UiContextual, WithContext, uiText)
 
 

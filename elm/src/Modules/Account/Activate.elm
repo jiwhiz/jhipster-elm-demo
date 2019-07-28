@@ -8,9 +8,9 @@ import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert

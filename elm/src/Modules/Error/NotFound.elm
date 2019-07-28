@@ -4,7 +4,7 @@ import Element exposing (Element, centerX, fill, height, paddingXY)
 import Element.Font as Font
 import Modules.Error.Common exposing (UiElement, toContext, tt)
 import Modules.Error.I18n.Phrases as ErrorPhrases
-import SharedState exposing (SharedState, SharedStateUpdate(..))
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (toElement, uiColumn)
 import UiFramework.Typography exposing (h1)
 

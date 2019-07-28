@@ -1,10 +1,10 @@
 module Modules.Login.Common exposing (Context, UiElement, toContext, tt)
 
-import I18n exposing (Language(..))
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
 import Modules.Shared.Api.User exposing (User)
-import SharedState exposing (SharedState)
+import Modules.Shared.I18n exposing (Language(..))
+import Modules.Shared.SharedState exposing (SharedState)
 import UiFramework exposing (UiContextual, WithContext, uiText)
 
 

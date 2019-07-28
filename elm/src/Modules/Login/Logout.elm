@@ -6,7 +6,7 @@ import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
-import SharedState exposing (SharedState, SharedStateUpdate(..))
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (toElement, uiColumn)
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))

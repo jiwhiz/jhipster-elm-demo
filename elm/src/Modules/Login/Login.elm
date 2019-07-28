@@ -5,16 +5,16 @@ import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
 import Form exposing (Form)
 import Form.View
-import I18n exposing (Language(..))
 import Modules.Login.Api.JWTToken exposing (JWT)
 import Modules.Login.Api.Request exposing (authenticate)
 import Modules.Login.Common exposing (UiElement, toContext, tt)
 import Modules.Login.I18n.Phrases as LoginPhrases
 import Modules.Login.I18n.Translator exposing (translator)
+import Modules.Shared.I18n exposing (Language(..))
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert

@@ -5,16 +5,16 @@ import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, w
 import Form exposing (Form)
 import Form.View
 import Http
-import I18n exposing (Language(..))
 import LocalStorage exposing (Event(..))
 import Modules.Account.Api.Request exposing (updateSettings)
 import Modules.Account.Common exposing (UiElement, toContext, tt)
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
+import Modules.Shared.I18n exposing (Language(..), languageCode, languageName, supportLanguages)
 import Modules.Shared.ResponsiveUtils exposing (wrapContent)
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
 import UiFramework.Form
@@ -63,7 +63,7 @@ update sharedState msg model =
         SaveSettings firstName lastName email languageKey ->
             let
                 settings =
-                    { username = SharedState.getUsername sharedState
+                    { username = getUsername sharedState
                     , firstName = firstName
                     , lastName = lastName
                     , email = email
@@ -111,7 +111,7 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Settings"
-    , toElement (toContext sharedState) (content (SharedState.getUsername sharedState) model)
+    , toElement (toContext sharedState) (content (getUsername sharedState) model)
     )
 
 
@@ -191,8 +191,8 @@ form language =
                     , placeholder = " - select language -"
                     , options =
                         List.map
-                            (\lang -> ( I18n.languageCode lang, I18n.languageName lang ))
-                            I18n.supportLanguages
+                            (\lang -> ( languageCode lang, languageName lang ))
+                            supportLanguages
                     }
                 }
     in

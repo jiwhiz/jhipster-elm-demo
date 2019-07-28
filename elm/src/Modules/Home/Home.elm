@@ -8,8 +8,8 @@ import Html.Attributes
 import Modules.Home.I18n.Phrases as HomePhrases
 import Modules.Home.I18n.Translator exposing (translator)
 import Modules.Shared.Api.User exposing (User)
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Routes exposing (Route(..), routeToUrlString)
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))

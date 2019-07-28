@@ -1,9 +1,9 @@
-module SharedState exposing (SharedState, SharedStateUpdate(..), getUsername, update)
+module Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername, update)
 
 import Browser.Navigation
 import Element exposing (Device)
-import I18n exposing (Language(..), languageFromCode)
 import Modules.Shared.Api.User exposing (User)
+import Modules.Shared.I18n exposing (Language(..), languageFromCode)
 import Time exposing (Posix, Zone)
 import Toasty.Defaults
 import UiFramework.Configuration exposing (ThemeConfig)

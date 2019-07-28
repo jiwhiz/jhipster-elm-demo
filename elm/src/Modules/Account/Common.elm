@@ -1,9 +1,9 @@
 module Modules.Account.Common exposing (Context, UiElement, toContext, tt)
 
-import I18n exposing (Language(..))
 import Modules.Account.I18n.Phrases as AccountPhrases
 import Modules.Account.I18n.Translator exposing (translator)
-import SharedState exposing (SharedState)
+import Modules.Shared.I18n exposing (Language(..))
+import Modules.Shared.SharedState exposing (SharedState)
 import UiFramework exposing (UiContextual, WithContext, uiText)
 
 

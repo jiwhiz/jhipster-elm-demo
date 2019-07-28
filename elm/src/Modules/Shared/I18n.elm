@@ -1,4 +1,4 @@
-module I18n exposing (Language(..), Translator, languageCode, languageFromCode, languageName, supportLanguages)
+module Modules.Shared.I18n exposing (Language(..), Translator, languageCode, languageFromCode, languageName, supportLanguages)
 
 
 type Language

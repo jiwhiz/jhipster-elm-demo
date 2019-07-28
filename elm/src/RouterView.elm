@@ -31,7 +31,6 @@ import FontAwesome.Brands
 import FontAwesome.Solid
 import FontAwesome.Styles
 import Html
-import I18n
 import Modules.Account.Activate as Activate
 import Modules.Account.PasswordResetFinish as PasswordResetFinish
 import Modules.Account.PasswordResetRequest as PasswordResetRequest
@@ -42,11 +41,12 @@ import Modules.Error.NotFound as NotFound
 import Modules.Home.Home as Home
 import Modules.Login.Login as Login
 import Modules.Login.Logout as Logout
+import Modules.Shared.I18n as I18n
 import Modules.Shared.I18n.Phrases as GlobalPhrases
 import Modules.Shared.I18n.Translator exposing (translator)
+import Modules.Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Router exposing (DropdownMenuState(..), Model, Msg(..), Page(..))
 import Routes exposing (Route(..))
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Themes.Darkly exposing (darklyThemeConfig)
 import UiFramework exposing (toElement)
 import UiFramework.Colors as Colors

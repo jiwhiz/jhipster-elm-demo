@@ -5,16 +5,16 @@ import Browser.Events
 import Browser.Navigation
 import Element exposing (Device, classifyDevice)
 import Html
-import I18n exposing (Language(..), languageFromCode)
 import Json.Decode as Decode
 import LocalStorage exposing (Event(..))
 import Modules.Shared.Api.Request exposing (getCurrentAccount)
 import Modules.Shared.Api.User exposing (User)
 import Modules.Shared.Constants exposing (jwtAuthenticationTokenKey)
+import Modules.Shared.I18n exposing (Language(..), languageFromCode)
+import Modules.Shared.SharedState as SharedState exposing (SharedState, SharedStateUpdate(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Router
 import RouterView
-import SharedState exposing (SharedState, SharedStateUpdate(..))
 import Task
 import Time exposing (Posix, Zone)
 import UiFramework.Configuration exposing (defaultThemeConfig)

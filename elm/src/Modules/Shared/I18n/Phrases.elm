@@ -1,7 +1,5 @@
 module Modules.Shared.I18n.Phrases exposing (Phrase(..))
 
-import I18n exposing (Language(..))
-
 
 type Phrase
     = MenuHome
@@ -24,4 +22,3 @@ type Phrase
     | MenuAccountLogin
     | MenuAccountLogout
     | MenuAccountRegister
-
