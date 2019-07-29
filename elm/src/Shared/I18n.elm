@@ -55,7 +55,7 @@ languageCode lang =
             "zh-cn"
 
         English ->
-            "English"
+            "en"
 
         French ->
-            "Français"
+            "fr"

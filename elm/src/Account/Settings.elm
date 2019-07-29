@@ -12,6 +12,7 @@ import Http
 import LocalStorage exposing (Event(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
+import Shared.Api.User exposing (User)
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
@@ -39,9 +40,14 @@ type Msg
     | SaveSettingsResponse (WebData ())
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( Values "" "" "" "" |> Form.View.idle
+init : User -> ( Model, Cmd Msg )
+init user =
+    ( Values
+        (user.firstName |> Maybe.withDefault "")
+        (user.lastName |> Maybe.withDefault "")
+        user.email
+        user.languageKey
+        |> Form.View.idle
     , Cmd.none
     )
 

@@ -157,7 +157,7 @@ update sharedState msg model =
                     fromUrl location
 
                 ( newModel, newCmd, newSharedStateUpdate ) =
-                    navigateTo route model
+                    navigateTo sharedState route model
             in
             ( { newModel | route = route }
             , newCmd
@@ -348,8 +348,8 @@ updateWith toPage toMsg model ( subModel, subCmd, subSharedStateUpdate ) =
     )
 
 
-navigateTo : Route -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
-navigateTo route model =
+navigateTo : SharedState -> Route -> Model -> ( Model, Cmd Msg, SharedStateUpdate )
+navigateTo sharedState route model =
     case route of
         Home ->
             Home.init |> initWith HomePage HomeMsg model NoUpdate
@@ -370,7 +370,15 @@ navigateTo route model =
             PasswordResetFinish.init key |> initWith PasswordResetFinishPage PasswordResetFinishMsg model NoUpdate
 
         Settings ->
-            Settings.init |> initWith SettingsPage SettingsMsg model NoUpdate
+            case sharedState.user of
+                Nothing ->
+                    ( { model | currentPage = NotFoundPage {} }
+                    , Cmd.none
+                    , NoUpdate
+                    )
+
+                Just user ->
+                    Settings.init user |> initWith SettingsPage SettingsMsg model NoUpdate
 
         PasswordUpdate ->
             PasswordUpdate.init |> initWith PasswordUpdatePage PasswordUpdateMsg model NoUpdate
