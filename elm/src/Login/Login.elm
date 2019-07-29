@@ -188,6 +188,7 @@ form language =
                 { parser = Ok
                 , value = .username
                 , update = \value values -> { values | username = value }
+                , error = always Nothing
                 , attributes =
                     { label = translate LoginPhrases.UsernameLabel
                     , placeholder = translate LoginPhrases.UsernamePlaceholder
@@ -199,6 +200,7 @@ form language =
                 { parser = Ok
                 , value = .password
                 , update = \value values -> { values | password = value }
+                , error = always Nothing
                 , attributes =
                     { label = translate LoginPhrases.PasswordLabel
                     , placeholder = translate LoginPhrases.PasswordPlaceholder
@@ -210,6 +212,7 @@ form language =
                 { parser = Ok
                 , value = .rememberMe
                 , update = \value values -> { values | rememberMe = value }
+                , error = always Nothing
                 , attributes =
                     { label = translate LoginPhrases.RememberMeLabel }
                 }

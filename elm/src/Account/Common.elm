@@ -56,6 +56,7 @@ sharedForms context =
             { parser = Ok
             , value = .username
             , update = \value values -> { values | username = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.UsernameLabel
                 , placeholder = translate AccountPhrases.UsernamePlaceholder
@@ -66,6 +67,7 @@ sharedForms context =
             { parser = Ok
             , value = .firstName
             , update = \value values -> { values | firstName = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.FirstnameLabel
                 , placeholder = translate AccountPhrases.FirstnamePlaceholder
@@ -76,6 +78,7 @@ sharedForms context =
             { parser = Ok
             , value = .lastName
             , update = \value values -> { values | lastName = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.LastnameLabel
                 , placeholder = translate AccountPhrases.LastnamePlaceholder
@@ -86,6 +89,7 @@ sharedForms context =
             { parser = Ok
             , value = .email
             , update = \value values -> { values | email = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.EmailLabel
                 , placeholder = translate AccountPhrases.EmailPlaceholder
@@ -96,6 +100,7 @@ sharedForms context =
             { parser = Ok
             , value = .currentPassword
             , update = \value values -> { values | currentPassword = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.CurrentPasswordLabel
                 , placeholder = translate AccountPhrases.CurrentPasswordPlaceholder
@@ -106,6 +111,7 @@ sharedForms context =
             { parser = Ok
             , value = .password
             , update = \value values -> { values | password = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.NewPasswordLabel
                 , placeholder = translate AccountPhrases.NewPasswordPlaceholder
@@ -126,6 +132,7 @@ sharedForms context =
                     , update =
                         \newValue values_ ->
                             { values_ | repeatPassword = newValue }
+                    , error = always Nothing
                     , attributes =
                         { label = translate AccountPhrases.ConfirmPasswordLabel
                         , placeholder = translate AccountPhrases.ConfirmPasswordPlaceholder
@@ -137,6 +144,7 @@ sharedForms context =
             { parser = Ok
             , value = .languageKey
             , update = \value values -> { values | languageKey = value }
+            , error = always Nothing
             , attributes =
                 { label = translate AccountPhrases.LanguageLabel
                 , placeholder = ""
