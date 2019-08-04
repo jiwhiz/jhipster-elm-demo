@@ -6,6 +6,7 @@ import Account.PasswordResetRequest as PasswordResetRequest
 import Account.PasswordUpdate as PasswordUpdate
 import Account.Register as Register
 import Account.Settings as Settings
+import Admin.UserManagement.UserList as UserList
 import Browser
 import Browser.Events as Events
 import Browser.Navigation
@@ -82,6 +83,7 @@ type DropdownMenuState
     | AccountOpen
     | LanguageOpen
     | ThemeOpen
+    | AdminOpen
 
 
 type Page
@@ -95,6 +97,7 @@ type Page
     | SettingsPage Settings.Model
     | PasswordUpdatePage PasswordUpdate.Model
     | ActivatePage Activate.Model
+    | UserListPage UserList.Model
 
 
 type Msg
@@ -106,6 +109,7 @@ type Msg
     | ToggleAccountDropdown
     | ToggleLanguageDropdown
     | ToggleThemeDropdown
+    | ToggleAdminDropdown
     | CloseDropdown
     | SelectLanguage I18n.Language
     | SelectTheme ThemeConfig
@@ -119,6 +123,7 @@ type Msg
     | SettingsMsg Settings.Msg
     | PasswordUpdateMsg PasswordUpdate.Msg
     | ActivateMsg Activate.Msg
+    | UserListMsg UserList.Msg
     | NoOp
 
 
@@ -187,6 +192,20 @@ update sharedState msg model =
 
         ( ToggleMenu, _ ) ->
             ( { model | toggleMenuState = not model.toggleMenuState }
+            , Cmd.none
+            , NoUpdate
+            )
+
+        ( ToggleAdminDropdown, _ ) ->
+            let
+                dropdownMenuState =
+                    if model.dropdownMenuState == AdminOpen then
+                        AllClosed
+
+                    else
+                        AdminOpen
+            in
+            ( { model | dropdownMenuState = dropdownMenuState }
             , Cmd.none
             , NoUpdate
             )
@@ -291,6 +310,10 @@ update sharedState msg model =
             Activate.update sharedState subMsg subModel
                 |> updateWith ActivatePage ActivateMsg model
 
+        ( UserListMsg subMsg, UserListPage subModel ) ->
+            UserList.update sharedState subMsg subModel
+                |> updateWith UserListPage UserListMsg model
+
         ( NoOp, _ ) ->
             -- Message arrived for wrong page. Ignore that
             ( model, Cmd.none, NoUpdate )
@@ -386,6 +409,9 @@ navigateTo sharedState route model =
         Activate key ->
             Activate.init key |> initWith ActivatePage ActivateMsg model NoUpdate
 
+        UserList ->
+            UserList.init sharedState.jwtToken |> initWith UserListPage UserListMsg model NoUpdate
+
         NotFound ->
             ( { model | currentPage = NotFoundPage {} }
             , Cmd.none
@@ -436,6 +462,9 @@ view msgMapper sharedState model =
                 ActivatePage pageModel ->
                     Activate.view sharedState pageModel |> transform ActivateMsg
 
+                UserListPage pageModel ->
+                    UserList.view sharedState pageModel |> transform UserListMsg
+
         navbarState =
             { toggleMenuState = model.toggleMenuState
             , dropdownState = model.dropdownMenuState
@@ -482,6 +511,14 @@ header sharedState navbarState =
 
         translate =
             translator sharedState.language
+
+        isAdmin =
+            case sharedState.user of
+                Nothing ->
+                    False
+
+                Just user ->
+                    List.member "ROLE_ADMIN" user.authorities
 
         brand =
             row []
@@ -534,6 +571,17 @@ header sharedState navbarState =
                 |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuTheme)
 
+        adminMenuItem =
+            Navbar.dropdown ToggleAdminDropdown AdminOpen
+                |> Navbar.withDropdownMenuItems
+                    [ Navbar.dropdownMenuLinkItem (NavigateTo UserList)
+                        |> Navbar.withDropdownMenuIcon FontAwesome.Solid.user
+                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAdminUserMgt)
+                    ]
+                |> Navbar.DropdownItem
+                |> Navbar.withMenuIcon FontAwesome.Solid.userPlus
+                |> Navbar.withMenuTitle (translate GlobalPhrases.MenuAdmin)
+
         accountMenuItem =
             Navbar.dropdown ToggleAccountDropdown AccountOpen
                 |> Navbar.withDropdownMenuItems
@@ -567,11 +615,21 @@ header sharedState navbarState =
         |> Navbar.withBrand brand
         |> Navbar.withBackgroundColor (Colors.getColor "#353d47")
         |> Navbar.withMenuItems
-            [ homeMenuItem
-            , languageMenuItem
-            , themeMenuItem
-            , accountMenuItem
-            ]
+            (if isAdmin then
+                [ homeMenuItem
+                , adminMenuItem
+                , languageMenuItem
+                , themeMenuItem
+                , accountMenuItem
+                ]
+
+             else
+                [ homeMenuItem
+                , languageMenuItem
+                , themeMenuItem
+                , accountMenuItem
+                ]
+            )
         |> Navbar.view
         |> toElement context
 
