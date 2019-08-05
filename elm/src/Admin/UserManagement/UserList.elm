@@ -18,7 +18,7 @@ import Time
 import Toasty.Defaults
 import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
 import UiFramework.Alert as Alert
-import UiFramework.Internal as Internal
+import UiFramework.Badge as Badge
 import UiFramework.Table as Table
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1, textLead)
@@ -148,6 +148,7 @@ userTable users =
             , createColumn UMPhrases.LastName (.lastName >> Maybe.withDefault "")
             , createColumn UMPhrases.Email .email
             , createColumn UMPhrases.Language .languageKey
+            , createRoleColumn
             , createColumn UMPhrases.CreatedBy .createdBy
             , createColumn UMPhrases.CreatedDate (.createdDate >> formatDate)
             , createColumn UMPhrases.LastModifiedBy .lastModifiedBy
@@ -161,7 +162,7 @@ createColumn headPhrase f =
     { head = tt headPhrase
     , viewData =
         \user ->
-            Internal.fromElement
+            fromElement
                 (\_ -> Element.text (f user))
     }
 
@@ -186,3 +187,13 @@ formatDate maybeDate =
                 ]
                 Time.utc
                 t
+
+
+createRoleColumn : Table.Column UserDTO (UiContextual Context) Msg
+createRoleColumn =
+    { head = tt UMPhrases.Role
+    , viewData =
+        \user ->
+            uiColumn [ spacing 5 ]
+                (List.map (\role -> Badge.simple Info role) user.authorities)
+    }
