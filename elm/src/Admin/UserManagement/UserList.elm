@@ -19,26 +19,31 @@ import Toasty.Defaults
 import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
 import UiFramework.Alert as Alert
 import UiFramework.Badge as Badge
+import UiFramework.Pagination as Pagination
 import UiFramework.Table as Table
-import UiFramework.Types exposing (Role(..))
+import UiFramework.Types exposing (Role(..), Size(..))
 import UiFramework.Typography exposing (h1, textLead)
 
 
 type alias Model =
-    { users : List UserDTO
-    , state : DataPageState
+    { loadingState : DataLoadingState
+    , totalItems : Int
+    , sliceSize : Int -- items per slice
+    , currentSliceNumber : Int
+    , users : List UserDTO
     }
 
 
-type DataPageState
+type DataLoadingState
     = Loading
-    | Loaded (List UserDTO) -- add pagination
+    | Loaded
     | Failed String
 
 
 type alias Context =
     { translate : UMPhrases.Phrase -> String
     , admin : Maybe User
+    , state : Pagination.PaginationState
     }
 
 
@@ -48,15 +53,19 @@ type alias UiElement msg =
 
 type Msg
     = NavigateTo Route
-    | LoadUsersResponse (RemoteData.WebData (List UserDTO))
+    | LoadUsersResponse (RemoteData.WebData { total : Int, list : List UserDTO })
+    | SelectPageSlice Int
 
 
 init : Maybe String -> ( Model, Cmd Msg )
 init token =
-    ( { users = []
-      , state = Loading
+    ( { loadingState = Loading
+      , totalItems = 0
+      , sliceSize = 10 -- default 10 items per slice
+      , currentSliceNumber = 0
+      , users = []
       }
-    , loadUsers token LoadUsersResponse
+    , loadUsers token { page = 0, size = 10, sort = ( "id", "asc" ) } LoadUsersResponse
     )
 
 
@@ -67,13 +76,13 @@ update sharedState msg model =
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
 
         LoadUsersResponse (RemoteData.Failure e) ->
-            ( { model | state = Failed "Load users error" }
+            ( { model | loadingState = Failed "Load users error" }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error "Error" "error"
             )
 
-        LoadUsersResponse (RemoteData.Success users) ->
-            ( { model | state = Loaded users }
+        LoadUsersResponse (RemoteData.Success result) ->
+            ( { model | loadingState = Loaded, users = result.list, totalItems = result.total }
             , Cmd.none
             , NoUpdate
             )
@@ -81,14 +90,23 @@ update sharedState msg model =
         LoadUsersResponse _ ->
             ( model, Cmd.none, NoUpdate )
 
+        SelectPageSlice sliceNumber ->
+            ( { model | currentSliceNumber = sliceNumber }
+            , loadUsers sharedState.jwtToken { page = sliceNumber, size = 10, sort = ( "id", "asc" ) } LoadUsersResponse
+            , NoUpdate
+            )
 
-toContext : SharedState -> UiContextual Context
-toContext sharedState =
+
+toContext sharedState model =
     { translate = translator sharedState.language
     , admin = sharedState.user
     , device = sharedState.device
     , themeConfig = sharedState.themeConfig
     , parentRole = Nothing
+    , state =
+        { numberOfSlices = 2
+        , currentSliceNumber = model.currentSliceNumber
+        }
     }
 
 
@@ -101,12 +119,12 @@ tt phrase =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Users"
-    , case model.state of
+    , case model.loadingState of
         Loading ->
             text "Loading"
 
-        Loaded users ->
-            toElement (toContext sharedState) (content model)
+        Loaded ->
+            toElement (toContext sharedState model) (content model)
 
         Failed e ->
             text e
@@ -118,29 +136,71 @@ content model =
     uiColumn
         [ width fill
         , height fill
-        , alignLeft
         , paddingXY 20 10
         , spacing 20
         ]
-        [ h1 [ paddingXY 0 30 ] <|
-            tt <|
-                UMPhrases.UserListTitle
-        , case model.state of
+        [ h1 [ paddingXY 0 30, alignLeft ] <|
+            tt UMPhrases.UserListTitle
+        , case model.loadingState of
             Loading ->
                 fromElement (\_ -> text "Loading")
 
-            Loaded users ->
-                userTable users
+            Loaded ->
+                pageableTable model
 
             Failed e ->
                 fromElement (\_ -> text e)
         ]
 
 
+pageableTable : Model -> UiElement Msg
+pageableTable model =
+    uiColumn [ spacing 20, width fill ]
+        [ userTable model.users
+        , userPageable model
+        ]
+
+
+userPageable : Model -> UiElement Msg
+userPageable model =
+    let
+        sliceCount =
+            model.totalItems // model.sliceSize
+
+        ( startNumber, endNumber ) =
+            if sliceCount < 5 then
+                ( 0, sliceCount )
+
+            else
+                ( max 0 (model.currentSliceNumber - 2)
+                , min sliceCount (model.currentSliceNumber + 2)
+                )
+
+        itemList =
+            (if startNumber > 0 then
+                [ Pagination.EllipsisItem ]
+
+             else
+                []
+            )
+                ++ List.map (\index -> Pagination.NumberItem index) (List.range startNumber endNumber)
+                ++ (if endNumber < sliceCount then
+                        [ Pagination.EllipsisItem ]
+
+                    else
+                        []
+                   )
+    in
+    Pagination.default SelectPageSlice
+        |> Pagination.withItems
+            itemList
+        |> Pagination.withExtraAttrs [ centerX ]
+        |> Pagination.view
+
+
 userTable : List UserDTO -> UiElement Msg
 userTable users =
     Table.simpleTable
-        --|> Table.withCompact
         |> Table.withBordered
         |> Table.withColumns
             [ createColumn UMPhrases.Id (.id >> String.fromInt)
@@ -157,7 +217,7 @@ userTable users =
         |> Table.view users
 
 
-createColumn : UMPhrases.Phrase -> (UserDTO -> String) -> Table.Column UserDTO (UiContextual Context) Msg
+createColumn : UMPhrases.Phrase -> (UserDTO -> String) -> Table.Column UserDTO Context Msg
 createColumn headPhrase f =
     { head = tt headPhrase
     , viewData =
@@ -189,7 +249,7 @@ formatDate maybeDate =
                 t
 
 
-createRoleColumn : Table.Column UserDTO (UiContextual Context) Msg
+createRoleColumn : Table.Column UserDTO Context Msg
 createRoleColumn =
     { head = tt UMPhrases.Role
     , viewData =

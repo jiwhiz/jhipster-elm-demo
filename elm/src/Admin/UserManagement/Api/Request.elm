@@ -2,16 +2,43 @@ module Admin.UserManagement.Api.Request exposing (loadUsers)
 
 import Admin.UserManagement.Api.User as User exposing (UserDTO)
 import Http
-import Json.Decode as Decode
 import RemoteData exposing (RemoteData(..), WebData)
-import Shared.Api.Endpoint as Endpoint exposing (unwrap)
-import Shared.Api.Helper exposing (get)
+import Shared.Api.Endpoint as Endpoint exposing (Endpoint, unwrap)
+import Shared.Api.Helper exposing (getPageableData)
 
 
-loadUsers : Maybe String -> (WebData (List UserDTO) -> msg) -> Cmd msg
-loadUsers token toMsg =
-    get
+loadUsers :
+    Maybe String
+    ->
+        { page : Int
+        , size : Int
+        , sort : ( String, String )
+        }
+    -> (WebData { total : Int, list : List UserDTO } -> msg)
+    -> Cmd msg
+loadUsers token param toMsg =
+    getPageableData
         token
-        (unwrap Endpoint.users)
+        (buildUrl Endpoint.users param)
         toMsg
-        (Decode.list User.decoder)
+        User.decoder
+
+
+buildUrl :
+    Endpoint
+    ->
+        { page : Int
+        , size : Int
+        , sort : ( String, String )
+        }
+    -> String
+buildUrl endpoint param =
+    unwrap endpoint
+        ++ "?page="
+        ++ String.fromInt param.page
+        ++ "&size="
+        ++ String.fromInt param.size
+        ++ "&sort="
+        ++ Tuple.first param.sort
+        ++ ","
+        ++ Tuple.second param.sort
