@@ -60,7 +60,7 @@ import Themes.Darkly exposing (darklyThemeConfig)
 import Toasty
 import Toasty.Defaults
 import UiFramework exposing (toElement)
-import UiFramework.Colors as Colors
+import UiFramework.ColorUtils exposing (hexToColor)
 import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
 import UiFramework.Navbar as Navbar
 import UiFramework.Toasty
@@ -613,7 +613,7 @@ header sharedState navbarState =
     in
     Navbar.default ToggleMenu
         |> Navbar.withBrand brand
-        |> Navbar.withBackgroundColor (Colors.getColor "#353d47")
+        |> Navbar.withBackgroundColor (hexToColor "#353d47")
         |> Navbar.withMenuItems
             (if isAdmin then
                 [ homeMenuItem
