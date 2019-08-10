@@ -1,7 +1,6 @@
 module Admin.UserManagement.Api.Request exposing (loadUsers)
 
 import Admin.UserManagement.Api.User as User exposing (UserDTO)
-import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Shared.Api.Endpoint as Endpoint exposing (Endpoint, unwrap)
 import Shared.Api.Helper exposing (getPageableData)

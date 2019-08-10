@@ -7,22 +7,18 @@ import Admin.UserManagement.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import DateFormat
 import Element exposing (..)
-import Element.Font as Font
-import Html
-import Html.Attributes
-import RemoteData exposing (RemoteData(..), WebData)
+import RemoteData exposing (RemoteData(..))
 import Routes exposing (Route(..), routeToUrlString)
 import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Time
 import Toasty.Defaults
-import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
-import UiFramework.Alert as Alert
+import UiFramework exposing (WithContext, fromElement, toElement, uiColumn, uiText)
 import UiFramework.Badge as Badge
 import UiFramework.Pagination as Pagination
 import UiFramework.Table as Table
 import UiFramework.Types exposing (Role(..), Size(..))
-import UiFramework.Typography exposing (h1, textLead)
+import UiFramework.Typography exposing (h1)
 
 
 type alias Model =
@@ -43,7 +39,6 @@ type DataLoadingState
 type alias Context =
     { translate : UMPhrases.Phrase -> String
     , admin : Maybe User
-    , state : Pagination.PaginationState
     }
 
 
@@ -75,7 +70,7 @@ update sharedState msg model =
         NavigateTo route ->
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
 
-        LoadUsersResponse (RemoteData.Failure e) ->
+        LoadUsersResponse (RemoteData.Failure _) ->
             ( { model | loadingState = Failed "Load users error" }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error "Error" "error"
@@ -97,19 +92,6 @@ update sharedState msg model =
             )
 
 
-toContext sharedState model =
-    { translate = translator sharedState.language
-    , admin = sharedState.user
-    , device = sharedState.device
-    , themeConfig = sharedState.themeConfig
-    , parentRole = Nothing
-    , state =
-        { numberOfSlices = 2
-        , currentSliceNumber = model.currentSliceNumber
-        }
-    }
-
-
 tt : UMPhrases.Phrase -> UiElement Msg
 tt phrase =
     uiText
@@ -124,7 +106,16 @@ view sharedState model =
             text "Loading"
 
         Loaded ->
-            toElement (toContext sharedState model) (content model)
+            let
+                context =
+                    { translate = translator sharedState.language
+                    , admin = sharedState.user
+                    , device = sharedState.device
+                    , themeConfig = sharedState.themeConfig
+                    , parentRole = Nothing
+                    }
+            in
+            toElement context (content model)
 
         Failed e ->
             text e
@@ -165,15 +156,15 @@ userPageable : Model -> UiElement Msg
 userPageable model =
     let
         sliceCount =
-            model.totalItems // model.sliceSize
+            1 + model.totalItems // model.sliceSize
 
         ( startNumber, endNumber ) =
-            if sliceCount < 5 then
-                ( 0, sliceCount )
+            if sliceCount <= 5 then
+                ( 0, sliceCount - 1 )
 
             else
                 ( max 0 (model.currentSliceNumber - 2)
-                , min sliceCount (model.currentSliceNumber + 2)
+                , min (sliceCount - 1) (model.currentSliceNumber + 2)
                 )
 
         itemList =
@@ -184,7 +175,7 @@ userPageable model =
                 []
             )
                 ++ List.map (\index -> Pagination.NumberItem index) (List.range startNumber endNumber)
-                ++ (if endNumber < sliceCount then
+                ++ (if endNumber < (sliceCount - 1) then
                         [ Pagination.EllipsisItem ]
 
                     else
@@ -195,7 +186,11 @@ userPageable model =
         |> Pagination.withItems
             itemList
         |> Pagination.withExtraAttrs [ centerX ]
-        |> Pagination.view
+        |> (Pagination.view <|
+                { numberOfSlices = sliceCount
+                , currentSliceNumber = model.currentSliceNumber
+                }
+           )
 
 
 userTable : List UserDTO -> UiElement Msg

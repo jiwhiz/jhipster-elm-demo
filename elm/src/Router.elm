@@ -62,6 +62,7 @@ import Toasty.Defaults
 import UiFramework exposing (toElement)
 import UiFramework.ColorUtils exposing (hexToColor)
 import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
+import UiFramework.Dropdown as Dropdown
 import UiFramework.Navbar as Navbar
 import UiFramework.Toasty
 import Url exposing (Url)
@@ -506,7 +507,6 @@ header sharedState navbarState =
             { device = sharedState.device
             , themeConfig = sharedState.themeConfig
             , parentRole = Nothing
-            , state = navbarState
             }
 
         translate =
@@ -546,65 +546,65 @@ header sharedState navbarState =
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuHome)
 
         languageMenuItem =
-            Navbar.dropdown ToggleLanguageDropdown LanguageOpen
-                |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuLinkItem (SelectLanguage I18n.English)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.English)
-                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.French)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.French)
-                    , Navbar.dropdownMenuLinkItem (SelectLanguage I18n.ChineseSimplified)
-                        |> Navbar.withDropdownMenuTitle (I18n.languageName I18n.ChineseSimplified)
+            Dropdown.default ToggleLanguageDropdown LanguageOpen
+                |> Dropdown.withMenuItems
+                    [ Dropdown.menuLinkItem (SelectLanguage I18n.English)
+                        |> Dropdown.withMenuTitle (I18n.languageName I18n.English)
+                    , Dropdown.menuLinkItem (SelectLanguage I18n.French)
+                        |> Dropdown.withMenuTitle (I18n.languageName I18n.French)
+                    , Dropdown.menuLinkItem (SelectLanguage I18n.ChineseSimplified)
+                        |> Dropdown.withMenuTitle (I18n.languageName I18n.ChineseSimplified)
                     ]
                 |> Navbar.DropdownItem
                 |> Navbar.withMenuIcon FontAwesome.Solid.flag
                 |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
 
         themeMenuItem =
-            Navbar.dropdown ToggleThemeDropdown ThemeOpen
-                |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuLinkItem (SelectTheme defaultThemeConfig)
-                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuThemeBootstrap)
-                    , Navbar.dropdownMenuLinkItem (SelectTheme darklyThemeConfig)
-                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuThemeDarkly)
+            Dropdown.default ToggleThemeDropdown ThemeOpen
+                |> Dropdown.withMenuItems
+                    [ Dropdown.menuLinkItem (SelectTheme defaultThemeConfig)
+                        |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeBootstrap)
+                    , Dropdown.menuLinkItem (SelectTheme darklyThemeConfig)
+                        |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeDarkly)
                     ]
                 |> Navbar.DropdownItem
                 |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuTheme)
 
         adminMenuItem =
-            Navbar.dropdown ToggleAdminDropdown AdminOpen
-                |> Navbar.withDropdownMenuItems
-                    [ Navbar.dropdownMenuLinkItem (NavigateTo UserList)
-                        |> Navbar.withDropdownMenuIcon FontAwesome.Solid.user
-                        |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAdminUserMgt)
+            Dropdown.default ToggleAdminDropdown AdminOpen
+                |> Dropdown.withMenuItems
+                    [ Dropdown.menuLinkItem (NavigateTo UserList)
+                        |> Dropdown.withMenuIcon FontAwesome.Solid.user
+                        |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAdminUserMgt)
                     ]
                 |> Navbar.DropdownItem
                 |> Navbar.withMenuIcon FontAwesome.Solid.userPlus
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuAdmin)
 
         accountMenuItem =
-            Navbar.dropdown ToggleAccountDropdown AccountOpen
-                |> Navbar.withDropdownMenuItems
+            Dropdown.default ToggleAccountDropdown AccountOpen
+                |> Dropdown.withMenuItems
                     (case sharedState.user of
                         Just _ ->
-                            [ Navbar.dropdownMenuLinkItem (NavigateTo Settings)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.wrench
-                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountSettings)
-                            , Navbar.dropdownMenuLinkItem (NavigateTo PasswordUpdate)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.key
-                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountPassword)
-                            , Navbar.dropdownMenuLinkItem (NavigateTo Logout)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signOutAlt
-                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountLogout)
+                            [ Dropdown.menuLinkItem (NavigateTo Settings)
+                                |> Dropdown.withMenuIcon FontAwesome.Solid.wrench
+                                |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountSettings)
+                            , Dropdown.menuLinkItem (NavigateTo PasswordUpdate)
+                                |> Dropdown.withMenuIcon FontAwesome.Solid.key
+                                |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountPassword)
+                            , Dropdown.menuLinkItem (NavigateTo Logout)
+                                |> Dropdown.withMenuIcon FontAwesome.Solid.signOutAlt
+                                |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountLogout)
                             ]
 
                         Nothing ->
-                            [ Navbar.dropdownMenuLinkItem (NavigateTo Login)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.signInAlt
-                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountLogin)
-                            , Navbar.dropdownMenuLinkItem (NavigateTo Register)
-                                |> Navbar.withDropdownMenuIcon FontAwesome.Solid.cashRegister
-                                |> Navbar.withDropdownMenuTitle (translate GlobalPhrases.MenuAccountRegister)
+                            [ Dropdown.menuLinkItem (NavigateTo Login)
+                                |> Dropdown.withMenuIcon FontAwesome.Solid.signInAlt
+                                |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountLogin)
+                            , Dropdown.menuLinkItem (NavigateTo Register)
+                                |> Dropdown.withMenuIcon FontAwesome.Solid.cashRegister
+                                |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountRegister)
                             ]
                     )
                 |> Navbar.DropdownItem
@@ -630,7 +630,7 @@ header sharedState navbarState =
                 , accountMenuItem
                 ]
             )
-        |> Navbar.view
+        |> Navbar.view navbarState
         |> toElement context
 
 
