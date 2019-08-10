@@ -3,7 +3,7 @@ module Main exposing (AppState(..), Flags, Model, Msg(..), WindowSize, getReady,
 import Browser
 import Browser.Events
 import Browser.Navigation
-import Element exposing (Device, classifyDevice)
+import Element exposing (Device)
 import Html
 import Json.Decode as Decode
 import LocalStorage exposing (Event(..))
@@ -17,6 +17,7 @@ import Shared.SharedState as SharedState exposing (SharedState, SharedStateUpdat
 import Task
 import Time exposing (Posix, Zone)
 import UiFramework.Configuration exposing (defaultThemeConfig)
+import UiFramework.ResponsiveUtils exposing (classifyDevice)
 import Url
 
 
