@@ -17,7 +17,7 @@ import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
-import UiFramework.Form
+import UiFramework.ComposableForm
 import UiFramework.Typography exposing (h1)
 
 
@@ -138,7 +138,7 @@ content username model =
                     fields =
                         sharedForms context
                 in
-                UiFramework.Form.layout
+                UiFramework.ComposableForm.layout
                     { onChange = FormChanged
                     , action = context.translate AccountPhrases.SaveButtonLabel
                     , loading = context.translate AccountPhrases.SaveButtonLoading

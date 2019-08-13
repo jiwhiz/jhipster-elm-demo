@@ -18,7 +18,7 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert
-import UiFramework.Form
+import UiFramework.ComposableForm
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
@@ -150,7 +150,7 @@ loginForm model =
         ]
         [ flatMap
             (\context ->
-                UiFramework.Form.layout
+                UiFramework.ComposableForm.layout
                     { onChange = FormChanged
                     , action = context.translate LoginPhrases.SignInButtonLabel
                     , loading = context.translate LoginPhrases.SignInLoadingLabel
