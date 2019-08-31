@@ -7,8 +7,6 @@ import Account.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form
-import Form.View
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
@@ -17,13 +15,14 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
 import UiFramework.Alert as Alert
-import UiFramework.ComposableForm
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 
 
 type alias Model =
-    Form.View.Model Values
+    WebForm.WebFormState Values
 
 
 type alias Values =
@@ -40,7 +39,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( Values "" |> Form.View.idle
+    ( Values "" |> WebForm.idle
     , Cmd.none
     )
 
@@ -62,12 +61,12 @@ update sharedState msg model =
             )
 
         ResetRequest email ->
-            case model.state of
-                Form.View.Loading ->
+            case model.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
-                    ( { model | state = Form.View.Loading }
+                    ( { model | status = WebForm.Loading }
                     , requestResetPassword email ResetResponse
                     , NoUpdate
                     )
@@ -82,13 +81,13 @@ update sharedState msg model =
                         _ ->
                             translate AccountPhrases.ServerError
             in
-            ( { model | state = Form.View.Error errorString }
+            ( { model | status = WebForm.Error errorString }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         ResetResponse (RemoteData.Success ()) ->
-            ( { model | state = Form.View.Idle }
+            ( { model | status = WebForm.Idle }
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
@@ -128,16 +127,14 @@ content model =
                     fields =
                         sharedForms context
                 in
-                UiFramework.ComposableForm.layout
-                    { onChange = FormChanged
-                    , action = context.translate AccountPhrases.ResetButtonLabel
-                    , loading = context.translate AccountPhrases.ResetButtonLoading
-                    , validation = Form.View.ValidateOnSubmit
-                    }
-                    (Form.succeed ResetRequest
-                        |> Form.append fields.emailField
+                WebForm.simpleForm
+                    FormChanged
+                    (ComposableForm.succeed ResetRequest
+                        |> ComposableForm.append fields.emailField
                     )
-                    model
+                    (context.translate AccountPhrases.ResetButtonLabel)
+                    |> WebForm.withLoadingLabel (context.translate AccountPhrases.ResetButtonLoading)
+                    |> WebForm.view model
             )
         ]
         |> wrapContent

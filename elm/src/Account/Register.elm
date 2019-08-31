@@ -6,8 +6,6 @@ import Account.I18n.Phrases as AccountPhrases
 import Account.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
-import Form
-import Form.View
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
@@ -15,12 +13,13 @@ import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
-import UiFramework.ComposableForm
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Typography exposing (h1)
 
 
 type alias Model =
-    Form.View.Model Values
+    WebForm.WebFormState Values
 
 
 type alias Values =
@@ -41,7 +40,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( Values "" "" "" "" "en" |> Form.View.idle
+    ( Values "" "" "" "" "en" |> WebForm.idle
     , Cmd.none
     )
 
@@ -68,12 +67,12 @@ update sharedState msg model =
                     , languageKey = Just languageKey
                     }
             in
-            case model.state of
-                Form.View.Loading ->
+            case model.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
-                    ( { model | state = Form.View.Loading }
+                    ( { model | status = WebForm.Loading }
                     , registerAccount registerVM RegisterResponse
                     , NoUpdate
                     )
@@ -88,13 +87,13 @@ update sharedState msg model =
                         _ ->
                             translate AccountPhrases.ServerError
             in
-            ( { model | state = Form.View.Error errorString }
+            ( { model | status = WebForm.Error errorString }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         RegisterResponse (RemoteData.Success ()) ->
-            ( { model | state = Form.View.Idle }
+            ( { model | status = WebForm.Idle }
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
@@ -130,23 +129,21 @@ content model =
                     fields =
                         sharedForms context
                 in
-                UiFramework.ComposableForm.layout
-                    { onChange = FormChanged
-                    , action = context.translate AccountPhrases.RegisterButtonLabel
-                    , loading = context.translate AccountPhrases.RegisterButtonLoading
-                    , validation = Form.View.ValidateOnSubmit
-                    }
-                    (Form.succeed Register
-                        |> Form.append fields.usernameField
-                        |> Form.append fields.emailField
-                        |> Form.append
-                            (Form.succeed (\password _ -> password)
-                                |> Form.append fields.passwordField
-                                |> Form.append fields.repeatPasswordField
+                WebForm.simpleForm
+                    FormChanged
+                    (ComposableForm.succeed Register
+                        |> ComposableForm.append fields.usernameField
+                        |> ComposableForm.append fields.emailField
+                        |> ComposableForm.append
+                            (ComposableForm.succeed (\password _ -> password)
+                                |> ComposableForm.append fields.passwordField
+                                |> ComposableForm.append fields.repeatPasswordField
                             )
-                        |> Form.append fields.languageField
+                        |> ComposableForm.append fields.languageField
                     )
-                    model
+                    (context.translate AccountPhrases.RegisterButtonLabel)
+                    |> WebForm.withLoadingLabel (context.translate AccountPhrases.RegisterButtonLoading)
+                    |> WebForm.view model
             )
         ]
         |> wrapContent

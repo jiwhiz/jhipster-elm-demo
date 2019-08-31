@@ -7,8 +7,6 @@ import Account.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form
-import Form.View
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
@@ -16,7 +14,8 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
 import UiFramework.Alert as Alert
-import UiFramework.ComposableForm
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
@@ -24,7 +23,7 @@ import Utils
 
 type alias Model =
     { key : Maybe String
-    , resetForm : Form.View.Model Values
+    , resetForm : WebForm.WebFormState Values
     }
 
 
@@ -36,7 +35,7 @@ type alias Values =
 
 type Msg
     = NavigateTo Route
-    | FormChanged (Form.View.Model Values)
+    | FormChanged (WebForm.WebFormState Values)
     | ResetPassword String
     | ResetResponse (WebData ())
 
@@ -44,7 +43,7 @@ type Msg
 init : Maybe String -> ( Model, Cmd Msg )
 init key =
     ( { key = key
-      , resetForm = Values "" "" |> Form.View.idle
+      , resetForm = Values "" "" |> WebForm.idle
       }
     , Cmd.none
     )
@@ -67,8 +66,8 @@ update sharedState msg model =
             )
 
         ResetPassword password ->
-            case model.resetForm.state of
-                Form.View.Loading ->
+            case model.resetForm.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
@@ -77,7 +76,7 @@ update sharedState msg model =
                             model.resetForm
 
                         newResetForm =
-                            { oldResetForm | state = Form.View.Loading }
+                            { oldResetForm | status = WebForm.Loading }
 
                         keyAndPasswordVM =
                             { key = model.key
@@ -104,7 +103,7 @@ update sharedState msg model =
                     model.resetForm
 
                 newResetForm =
-                    { oldResetForm | state = Form.View.Error errorString }
+                    { oldResetForm | status = WebForm.Error errorString }
             in
             ( { model | resetForm = newResetForm }
             , Cmd.none
@@ -117,7 +116,7 @@ update sharedState msg model =
                     model.resetForm
 
                 newResetForm =
-                    { oldResetForm | state = Form.View.Idle }
+                    { oldResetForm | status = WebForm.Idle }
             in
             ( { model | resetForm = newResetForm }
             , Utils.perform <| NavigateTo Login
@@ -163,19 +162,17 @@ content model =
                             fields =
                                 sharedForms context
                         in
-                        UiFramework.ComposableForm.layout
-                            { onChange = FormChanged
-                            , action = context.translate AccountPhrases.ResetButtonLabel
-                            , loading = context.translate AccountPhrases.ResetButtonLoading
-                            , validation = Form.View.ValidateOnSubmit
-                            }
-                            (Form.succeed ResetPassword
-                                |> Form.append
-                                    (Form.succeed (\password _ -> password)
-                                        |> Form.append fields.passwordField
-                                        |> Form.append fields.repeatPasswordField
+                        WebForm.simpleForm
+                            FormChanged
+                            (ComposableForm.succeed ResetPassword
+                                |> ComposableForm.append
+                                    (ComposableForm.succeed (\password _ -> password)
+                                        |> ComposableForm.append fields.passwordField
+                                        |> ComposableForm.append fields.repeatPasswordField
                                     )
                             )
-                            model.resetForm
+                            (context.translate AccountPhrases.ResetButtonLabel)
+                            |> WebForm.withLoadingLabel (context.translate AccountPhrases.ResetButtonLoading)
+                            |> WebForm.view model.resetForm
                     )
         ]

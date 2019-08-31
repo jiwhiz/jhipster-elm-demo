@@ -3,8 +3,6 @@ module Login.Login exposing (Model, Msg(..), Values, init, update, view)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form exposing (Form)
-import Form.View
 import Login.Api.JWTToken exposing (JWT)
 import Login.Api.Request exposing (authenticate)
 import Login.Common exposing (UiElement, toContext, tt)
@@ -18,14 +16,17 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
 import UiFramework.Alert as Alert
-import UiFramework.ComposableForm
+import UiFramework.Form.CheckboxField as CheckboxField
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.TextField as TextField
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
 
 
 type alias Model =
-    Form.View.Model Values
+    WebForm.WebFormState Values
 
 
 type alias Values =
@@ -45,7 +46,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( Values "" "" False |> Form.View.idle
+    ( Values "" "" False |> WebForm.idle
     , Cmd.none
     )
 
@@ -74,24 +75,24 @@ update sharedState msg model =
                     , rememberMe = rememberMe
                     }
             in
-            case model.state of
-                Form.View.Loading ->
+            case model.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
-                    ( { model | state = Form.View.Loading }
+                    ( { model | status = WebForm.Loading }
                     , authenticate loginVM LoginResponse
                     , NoUpdate
                     )
 
         LoginResponse (RemoteData.Failure _) ->
-            ( { model | state = Form.View.Error (translate LoginPhrases.FailedLogin) }
+            ( { model | status = WebForm.Error (translate LoginPhrases.FailedLogin) }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate LoginPhrases.Error) (translate LoginPhrases.FailedLogin)
             )
 
         LoginResponse (RemoteData.Success jwt) ->
-            ( { model | state = Form.View.Idle }
+            ( { model | status = WebForm.Idle }
             , Utils.perform <|
                 ShowToastAndRedirect <|
                     Toasty.Defaults.Success (translate LoginPhrases.Success) (translate <| LoginPhrases.LoggedIn)
@@ -134,14 +135,14 @@ content model =
                             (tt <| LoginPhrases.LoggedInAs user.username)
 
                     Nothing ->
-                        loginForm model
+                        loginPanel model
             )
         ]
         |> wrapContent
 
 
-loginForm : Model -> UiElement Msg
-loginForm model =
+loginPanel : Model -> UiElement Msg
+loginPanel model =
     uiColumn
         [ width fill
         , height fill
@@ -150,14 +151,12 @@ loginForm model =
         ]
         [ flatMap
             (\context ->
-                UiFramework.ComposableForm.layout
-                    { onChange = FormChanged
-                    , action = context.translate LoginPhrases.SignInButtonLabel
-                    , loading = context.translate LoginPhrases.SignInLoadingLabel
-                    , validation = Form.View.ValidateOnSubmit
-                    }
+                WebForm.simpleForm
+                    FormChanged
                     (form context.language)
-                    model
+                    (context.translate LoginPhrases.SignInButtonLabel)
+                    |> WebForm.withLoadingLabel (context.translate LoginPhrases.SignInLoadingLabel)
+                    |> WebForm.view model
             )
         , Alert.simple Warning <|
             Alert.link
@@ -177,47 +176,48 @@ loginForm model =
         ]
 
 
-form : Language -> Form Values Msg
+form : Language -> ComposableForm.Form Values Msg
 form language =
     let
         translate =
             translator language
 
         usernameField =
-            Form.textField
+            ComposableForm.textField
                 { parser = Ok
                 , value = .username
                 , update = \value values -> { values | username = value }
                 , error = always Nothing
                 , attributes =
-                    { label = translate LoginPhrases.UsernameLabel
-                    , placeholder = translate LoginPhrases.UsernamePlaceholder
-                    }
+                    TextField.defaultAttributes
+                        |> TextField.withLabel (translate LoginPhrases.UsernameLabel)
+                        |> TextField.withPlaceholder (translate LoginPhrases.UsernamePlaceholder)
                 }
 
         passwordField =
-            Form.passwordField
+            ComposableForm.textField
                 { parser = Ok
                 , value = .password
                 , update = \value values -> { values | password = value }
                 , error = always Nothing
                 , attributes =
-                    { label = translate LoginPhrases.PasswordLabel
-                    , placeholder = translate LoginPhrases.PasswordPlaceholder
-                    }
+                    TextField.defaultAttributes
+                        |> TextField.withLabel (translate LoginPhrases.PasswordLabel)
+                        |> TextField.withPlaceholder (translate LoginPhrases.PasswordPlaceholder)
                 }
 
         rememberMeCheckbox =
-            Form.checkboxField
+            ComposableForm.checkboxField
                 { parser = Ok
                 , value = .rememberMe
                 , update = \value values -> { values | rememberMe = value }
                 , error = always Nothing
                 , attributes =
-                    { label = translate LoginPhrases.RememberMeLabel }
+                    CheckboxField.defaultAttributes
+                        |> CheckboxField.withLabel (translate LoginPhrases.RememberMeLabel)
                 }
     in
-    Form.succeed Login
-        |> Form.append usernameField
-        |> Form.append passwordField
-        |> Form.append rememberMeCheckbox
+    ComposableForm.succeed Login
+        |> ComposableForm.append usernameField
+        |> ComposableForm.append passwordField
+        |> ComposableForm.append rememberMeCheckbox

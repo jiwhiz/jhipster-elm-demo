@@ -6,7 +6,20 @@ import Admin.UserManagement.I18n.Phrases as UMPhrases
 import Admin.UserManagement.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import DateFormat
-import Element exposing (..)
+import Element
+    exposing
+        ( DeviceClass(..)
+        , Element
+        , Orientation(..)
+        , alignLeft
+        , centerX
+        , fill
+        , height
+        , paddingXY
+        , spacing
+        , text
+        , width
+        )
 import RemoteData exposing (RemoteData(..))
 import Routes exposing (Route(..), routeToUrlString)
 import Shared.Api.User exposing (User)

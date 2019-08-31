@@ -7,8 +7,6 @@ import Account.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, fill, height, paddingXY, spacing, width)
 import Element.Font as Font
-import Form
-import Form.View
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
@@ -16,12 +14,13 @@ import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
-import UiFramework.ComposableForm
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Typography exposing (h1)
 
 
 type alias Model =
-    Form.View.Model Values
+    WebForm.WebFormState Values
 
 
 type alias Values =
@@ -40,7 +39,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( Values "" "" "" |> Form.View.idle
+    ( Values "" "" "" |> WebForm.idle
     , Cmd.none
     )
 
@@ -68,12 +67,12 @@ update sharedState msg model =
                     , newPassword = newPassword
                     }
             in
-            case model.state of
-                Form.View.Loading ->
+            case model.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
-                    ( { model | state = Form.View.Loading }
+                    ( { model | status = WebForm.Loading }
                     , updatePassword sharedState.jwtToken passwordUpdateVM ChangePasswordResponse
                     , NoUpdate
                     )
@@ -88,13 +87,13 @@ update sharedState msg model =
                         _ ->
                             translate AccountPhrases.ServerError
             in
-            ( { model | state = Form.View.Error errorString }
+            ( { model | status = WebForm.Error errorString }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         ChangePasswordResponse (RemoteData.Success ()) ->
-            ( { model | state = Form.View.Idle }
+            ( { model | status = WebForm.Idle }
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
@@ -131,21 +130,19 @@ content username model =
                     fields =
                         sharedForms context
                 in
-                UiFramework.ComposableForm.layout
-                    { onChange = FormChanged
-                    , action = context.translate AccountPhrases.SaveButtonLabel
-                    , loading = context.translate AccountPhrases.SaveButtonLoading
-                    , validation = Form.View.ValidateOnSubmit
-                    }
-                    (Form.succeed ChangePassword
-                        |> Form.append fields.currentPasswordField
-                        |> Form.append
-                            (Form.succeed (\password _ -> password)
-                                |> Form.append fields.passwordField
-                                |> Form.append fields.repeatPasswordField
+                WebForm.simpleForm
+                    FormChanged
+                    (ComposableForm.succeed ChangePassword
+                        |> ComposableForm.append fields.currentPasswordField
+                        |> ComposableForm.append
+                            (ComposableForm.succeed (\password _ -> password)
+                                |> ComposableForm.append fields.passwordField
+                                |> ComposableForm.append fields.repeatPasswordField
                             )
                     )
-                    model
+                    (context.translate AccountPhrases.SaveButtonLabel)
+                    |> WebForm.withLoadingLabel (context.translate AccountPhrases.SaveButtonLoading)
+                    |> WebForm.view model
             )
         ]
         |> wrapContent

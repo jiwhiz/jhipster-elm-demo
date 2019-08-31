@@ -6,8 +6,6 @@ import Account.I18n.Phrases as AccountPhrases
 import Account.I18n.Translator exposing (translator)
 import Browser.Navigation exposing (pushUrl)
 import Element exposing (Element, alignLeft, fill, height, paddingXY, spacing, width)
-import Form
-import Form.View
 import Http
 import LocalStorage exposing (Event(..))
 import RemoteData exposing (RemoteData(..), WebData)
@@ -17,12 +15,13 @@ import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
 import UiFramework exposing (flatMap, toElement, uiColumn)
-import UiFramework.ComposableForm
+import UiFramework.Form.ComposableForm as ComposableForm
+import UiFramework.Form.WebForm as WebForm
 import UiFramework.Typography exposing (h1)
 
 
 type alias Model =
-    Form.View.Model Values
+    WebForm.WebFormState Values
 
 
 type alias Values =
@@ -47,7 +46,7 @@ init user =
         (user.lastName |> Maybe.withDefault "")
         user.email
         user.languageKey
-        |> Form.View.idle
+        |> WebForm.idle
     , Cmd.none
     )
 
@@ -75,12 +74,12 @@ update sharedState msg model =
                     , languageKey = languageKey
                     }
             in
-            case model.state of
-                Form.View.Loading ->
+            case model.status of
+                WebForm.Loading ->
                     ( model, Cmd.none, NoUpdate )
 
                 _ ->
-                    ( { model | state = Form.View.Loading }
+                    ( { model | status = WebForm.Loading }
                     , updateSettings sharedState.jwtToken settings SaveSettingsResponse
                     , NoUpdate
                     )
@@ -95,13 +94,13 @@ update sharedState msg model =
                         _ ->
                             translate AccountPhrases.ServerError
             in
-            ( { model | state = Form.View.Error errorString }
+            ( { model | status = WebForm.Error errorString }
             , Cmd.none
             , ShowToast <| Toasty.Defaults.Error (translate AccountPhrases.Error) errorString
             )
 
         SaveSettingsResponse (RemoteData.Success ()) ->
-            ( { model | state = Form.View.Idle }
+            ( { model | status = WebForm.Idle }
             , Cmd.none
             , ShowToast <|
                 Toasty.Defaults.Success
@@ -138,19 +137,17 @@ content username model =
                     fields =
                         sharedForms context
                 in
-                UiFramework.ComposableForm.layout
-                    { onChange = FormChanged
-                    , action = context.translate AccountPhrases.SaveButtonLabel
-                    , loading = context.translate AccountPhrases.SaveButtonLoading
-                    , validation = Form.View.ValidateOnSubmit
-                    }
-                    (Form.succeed SaveSettings
-                        |> Form.append fields.firstNameField
-                        |> Form.append fields.lastNameField
-                        |> Form.append fields.emailField
-                        |> Form.append fields.languageField
+                WebForm.simpleForm
+                    FormChanged
+                    (ComposableForm.succeed SaveSettings
+                        |> ComposableForm.append fields.firstNameField
+                        |> ComposableForm.append fields.lastNameField
+                        |> ComposableForm.append fields.emailField
+                        |> ComposableForm.append fields.languageField
                     )
-                    model
+                    (context.translate AccountPhrases.SaveButtonLabel)
+                    |> WebForm.withLoadingLabel (context.translate AccountPhrases.SaveButtonLoading)
+                    |> WebForm.view model
             )
         ]
         |> wrapContent
