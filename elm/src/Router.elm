@@ -55,6 +55,7 @@ import Shared.I18n as I18n
 import Shared.I18n.Phrases as GlobalPhrases
 import Shared.I18n.Translator exposing (translator)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
+import Shared.Toasty
 import Task
 import Themes.Darkly exposing (darklyThemeConfig)
 import Toasty
@@ -64,7 +65,6 @@ import UiFramework.ColorUtils exposing (hexToColor)
 import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
 import UiFramework.Dropdown as Dropdown
 import UiFramework.Navbar as Navbar
-import UiFramework.Toasty
 import Url exposing (Url)
 import Utils
 
@@ -476,7 +476,7 @@ view msgMapper sharedState model =
                 (column
                     [ width fill
                     , height fill
-                    , inFront <| UiFramework.Toasty.view ToastyMsg model.toasties
+                    , inFront <| Shared.Toasty.view ToastyMsg model.toasties
                     ]
                     [ FontAwesome.Styles.css |> html
                     , header sharedState navbarState
