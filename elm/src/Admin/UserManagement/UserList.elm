@@ -26,7 +26,7 @@ import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Time
 import Toasty.Defaults
-import UiFramework exposing (WithContext, fromElement, toElement, uiColumn, uiText)
+import UiFramework exposing (WithContext, fromElement, toElement, uiColumn, uiContextualText)
 import UiFramework.Badge as Badge
 import UiFramework.Pagination as Pagination
 import UiFramework.Table as Table
@@ -107,7 +107,7 @@ update sharedState msg model =
 
 tt : UMPhrases.Phrase -> UiElement Msg
 tt phrase =
-    uiText
+    uiContextualText
         (\context -> context.translate phrase)
 
 

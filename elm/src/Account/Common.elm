@@ -4,7 +4,7 @@ import Account.I18n.Phrases as AccountPhrases
 import Account.I18n.Translator exposing (translator)
 import Shared.I18n exposing (Language, languageCode, languageName, supportLanguages)
 import Shared.SharedState exposing (SharedState)
-import UiFramework exposing (UiContextual, WithContext, uiText)
+import UiFramework exposing (UiContextual, WithContext, uiContextualText)
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.SelectField as SelectField
 import UiFramework.Form.TextField as TextField
@@ -32,7 +32,7 @@ toContext sharedState =
 
 tt : AccountPhrases.Phrase -> UiElement msg
 tt phrase =
-    uiText
+    uiContextualText
         (\context -> context.translate phrase)
 
 

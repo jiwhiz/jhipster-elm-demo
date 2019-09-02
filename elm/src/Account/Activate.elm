@@ -132,7 +132,7 @@ content model =
             Failed err ->
                 Alert.simple Danger <|
                     uiParagraph []
-                        [ uiText (\_ -> err)
+                        [ uiText err
                         , Alert.link
                             { onPress = Just <| NavigateTo Register
                             , label = tt AccountPhrases.UseRegistrationToSignup

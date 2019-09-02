@@ -6,6 +6,7 @@ type Phrase
     | MenuTheme
     | MenuThemeBootstrap
     | MenuThemeDarkly
+    | MenuThemeMateria
     | MenuAdmin
     | MenuAdminUserMgt
     | MenuAdminTracker

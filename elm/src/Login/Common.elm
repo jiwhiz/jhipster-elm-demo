@@ -5,7 +5,7 @@ import Login.I18n.Translator exposing (translator)
 import Shared.Api.User exposing (User)
 import Shared.I18n exposing (Language(..))
 import Shared.SharedState exposing (SharedState)
-import UiFramework exposing (UiContextual, WithContext, uiText)
+import UiFramework exposing (UiContextual, WithContext, uiContextualText)
 
 
 type alias Context =
@@ -32,5 +32,5 @@ toContext sharedState =
 
 tt : LoginPhrases.Phrase -> UiElement msg
 tt phrase =
-    uiText
+    uiContextualText
         (\context -> context.translate phrase)

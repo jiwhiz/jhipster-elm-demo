@@ -18,6 +18,9 @@ translate phrase =
         MenuThemeDarkly ->
             "Darkly"
 
+        MenuThemeMateria ->
+            "Materia"
+
         MenuAdmin ->
             "Administration"
 

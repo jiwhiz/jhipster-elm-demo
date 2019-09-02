@@ -10,7 +10,7 @@ import Html.Attributes
 import Routes exposing (Route(..), routeToUrlString)
 import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
-import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiParagraph, uiRow, uiText)
+import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiContextualText, uiParagraph, uiRow)
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1, textLead)
@@ -58,7 +58,7 @@ toContext sharedState =
 
 tt : HomePhrases.Phrase -> UiElement Msg
 tt phrase =
-    uiText
+    uiContextualText
         (\context -> context.translate phrase)
 
 

@@ -167,7 +167,7 @@ loginPanel model =
             uiParagraph
                 [ Font.alignLeft ]
                 [ tt LoginPhrases.NoAccountYet
-                , uiText (\_ -> " ")
+                , uiText " "
                 , Alert.link
                     { onPress = Just <| NavigateTo Register
                     , label = tt LoginPhrases.RegisterNewAccount

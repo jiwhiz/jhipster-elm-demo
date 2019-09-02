@@ -18,6 +18,9 @@ translate phrase =
         MenuThemeDarkly ->
             "暗黑模式"
 
+        MenuThemeMateria ->
+            "材料模式"
+
         MenuAdmin ->
             "管理"
 

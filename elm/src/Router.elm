@@ -58,6 +58,7 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Shared.Toasty
 import Task
 import Themes.Darkly exposing (darklyThemeConfig)
+import Themes.Materia exposing (materiaThemeConfig)
 import Toasty
 import Toasty.Defaults
 import UiFramework exposing (toElement)
@@ -483,8 +484,8 @@ view msgMapper sharedState model =
                     , el
                         [ height fill
                         , width fill
-                        , Background.color sharedState.themeConfig.bodyBackground
-                        , Font.color <| sharedState.themeConfig.fontColor sharedState.themeConfig.bodyBackground
+                        , Background.color sharedState.themeConfig.globalConfig.bodyBackground
+                        , Font.color <| sharedState.themeConfig.globalConfig.fontColor sharedState.themeConfig.globalConfig.bodyBackground
                         ]
                         content
                     , footer sharedState
@@ -566,6 +567,8 @@ header sharedState navbarState =
                         |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeBootstrap)
                     , Dropdown.menuLinkItem (SelectTheme darklyThemeConfig)
                         |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeDarkly)
+                    , Dropdown.menuLinkItem (SelectTheme materiaThemeConfig)
+                        |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeMateria)
                     ]
                 |> Navbar.DropdownItem
                 |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
