@@ -171,7 +171,7 @@ content model =
                                         |> ComposableForm.append fields.repeatPasswordField
                                     )
                             )
-                            (context.translate AccountPhrases.ResetButtonLabel)
+                            |> WebForm.withSubmitLabel (context.translate AccountPhrases.ResetButtonLabel)
                             |> WebForm.withLoadingLabel (context.translate AccountPhrases.ResetButtonLoading)
                             |> WebForm.view model.resetForm
                     )

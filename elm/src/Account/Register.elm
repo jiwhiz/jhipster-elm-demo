@@ -141,7 +141,7 @@ content model =
                             )
                         |> ComposableForm.append fields.languageField
                     )
-                    (context.translate AccountPhrases.RegisterButtonLabel)
+                    |> WebForm.withSubmitLabel (context.translate AccountPhrases.RegisterButtonLabel)
                     |> WebForm.withLoadingLabel (context.translate AccountPhrases.RegisterButtonLoading)
                     |> WebForm.view model
             )

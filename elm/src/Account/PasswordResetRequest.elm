@@ -132,7 +132,7 @@ content model =
                     (ComposableForm.succeed ResetRequest
                         |> ComposableForm.append fields.emailField
                     )
-                    (context.translate AccountPhrases.ResetButtonLabel)
+                    |> WebForm.withSubmitLabel (context.translate AccountPhrases.ResetButtonLabel)
                     |> WebForm.withLoadingLabel (context.translate AccountPhrases.ResetButtonLoading)
                     |> WebForm.view model
             )

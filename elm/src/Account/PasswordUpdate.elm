@@ -140,7 +140,7 @@ content username model =
                                 |> ComposableForm.append fields.repeatPasswordField
                             )
                     )
-                    (context.translate AccountPhrases.SaveButtonLabel)
+                    |> WebForm.withSubmitLabel (context.translate AccountPhrases.SaveButtonLabel)
                     |> WebForm.withLoadingLabel (context.translate AccountPhrases.SaveButtonLoading)
                     |> WebForm.view model
             )

@@ -154,7 +154,7 @@ loginPanel model =
                 WebForm.simpleForm
                     FormChanged
                     (form context.language)
-                    (context.translate LoginPhrases.SignInButtonLabel)
+                    |> WebForm.withSubmitLabel (context.translate LoginPhrases.SignInButtonLabel)
                     |> WebForm.withLoadingLabel (context.translate LoginPhrases.SignInLoadingLabel)
                     |> WebForm.view model
             )
