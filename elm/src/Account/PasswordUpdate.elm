@@ -13,7 +13,7 @@ import Routes exposing (Route(..), routeToUrlString)
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..), getUsername)
 import Toasty.Defaults
-import UiFramework exposing (flatMap, toElement, uiColumn)
+import UiFramework
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.WebForm as WebForm
 import UiFramework.Typography exposing (h1)
@@ -108,13 +108,13 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Change Password"
-    , toElement (toContext sharedState) (content (getUsername sharedState) model)
+    , UiFramework.toElement (toContext sharedState) (content (getUsername sharedState) model)
     )
 
 
 content : String -> Model -> UiElement Msg
 content username model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , paddingXY 20 10
@@ -124,7 +124,7 @@ content username model =
         [ h1 [ paddingXY 0 30 ] <|
             tt <|
                 AccountPhrases.UpdatePasswordTitle username
-        , flatMap
+        , UiFramework.withContext
             (\context ->
                 let
                     fields =

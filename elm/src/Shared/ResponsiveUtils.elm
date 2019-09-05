@@ -5,11 +5,7 @@ module Shared.ResponsiveUtils exposing (wrapContent)
 -}
 
 import Element exposing (DeviceClass(..), Orientation(..), el, fill, fillPortion, none, row, width)
-import UiFramework.Internal as Internal
-
-
-type alias UiElement context msg =
-    Internal.WithContext (Internal.UiContextual context) msg
+import UiFramework
 
 
 {-| Elm-ui does not have a "percent padding". For example, I can't get 50% padding because I have to use pixels.
@@ -29,9 +25,9 @@ Each "padding," which is just Element.none to display nothing, will be half the 
      If you want 0 padding, just put 0 in the respective position
 
 -}
-wrapContent : UiElement context msg -> UiElement context msg
+wrapContent : UiFramework.WithContext context msg -> UiFramework.WithContext context msg
 wrapContent content =
-    Internal.fromElement
+    UiFramework.fromElement
         (\context ->
             let
                 ( left, middle, right ) =
@@ -57,7 +53,7 @@ wrapContent content =
             row
                 [ width fill ]
                 [ el [ width <| fillPortion left ] none
-                , el [ width <| fillPortion middle ] (Internal.toElement context content)
+                , el [ width <| fillPortion middle ] (UiFramework.toElement context content)
                 , el [ width <| fillPortion right ] none
                 ]
         )

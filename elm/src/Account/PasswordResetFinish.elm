@@ -12,7 +12,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Routes exposing (Route(..), routeToUrlString)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (flatMap, toElement, uiColumn)
+import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.WebForm as WebForm
@@ -133,13 +133,13 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Reset"
-    , toElement (toContext sharedState) (content model)
+    , UiFramework.toElement (toContext sharedState) (content model)
     )
 
 
 content : Model -> UiElement Msg
 content model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , paddingXY 20 10
@@ -156,7 +156,7 @@ content model =
                     tt AccountPhrases.MissingResetKey
 
             Just _ ->
-                flatMap
+                UiFramework.withContext
                     (\context ->
                         let
                             fields =

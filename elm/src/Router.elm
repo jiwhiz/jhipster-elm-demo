@@ -61,7 +61,7 @@ import Themes.Darkly exposing (darklyThemeConfig)
 import Themes.Materia exposing (materiaThemeConfig)
 import Toasty
 import Toasty.Defaults
-import UiFramework exposing (toElement)
+import UiFramework
 import UiFramework.ColorUtils exposing (hexToColor)
 import UiFramework.Configuration exposing (ThemeConfig, defaultThemeConfig)
 import UiFramework.Dropdown as Dropdown
@@ -634,7 +634,7 @@ header sharedState navbarState =
                 ]
             )
         |> Navbar.view navbarState
-        |> toElement context
+        |> UiFramework.toElement context
 
 
 footer : SharedState -> Element Msg

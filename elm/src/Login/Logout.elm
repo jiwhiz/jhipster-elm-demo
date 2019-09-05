@@ -7,7 +7,7 @@ import Login.I18n.Phrases as LoginPhrases
 import Shared.Constants exposing (jwtAuthenticationTokenKey)
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
-import UiFramework exposing (toElement, uiColumn)
+import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))
 
@@ -37,13 +37,13 @@ update _ msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState _ =
     ( "Logout"
-    , toElement (toContext sharedState) content
+    , UiFramework.toElement (toContext sharedState) content
     )
 
 
 content : UiElement Msg
 content =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , paddingXY 30 10

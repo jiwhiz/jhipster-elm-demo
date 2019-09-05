@@ -12,7 +12,7 @@ import Routes exposing (Route(..), routeToUrlString)
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (toElement, uiColumn, uiParagraph, uiText)
+import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
@@ -95,13 +95,13 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Activation"
-    , toElement (toContext sharedState) (content model)
+    , UiFramework.toElement (toContext sharedState) (content model)
     )
 
 
 content : Model -> UiElement Msg
 content model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , alignLeft
@@ -121,7 +121,7 @@ content model =
 
             Succeeded ->
                 Alert.simple Success <|
-                    uiParagraph []
+                    UiFramework.uiParagraph []
                         [ tt AccountPhrases.UserAccountActivated
                         , Alert.link
                             { onPress = Just <| NavigateTo Login
@@ -131,8 +131,8 @@ content model =
 
             Failed err ->
                 Alert.simple Danger <|
-                    uiParagraph []
-                        [ uiText err
+                    UiFramework.uiParagraph []
+                        [ UiFramework.uiText err
                         , Alert.link
                             { onPress = Just <| NavigateTo Register
                             , label = tt AccountPhrases.UseRegistrationToSignup

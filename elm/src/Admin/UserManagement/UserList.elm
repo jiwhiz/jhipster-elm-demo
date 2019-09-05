@@ -26,7 +26,7 @@ import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Time
 import Toasty.Defaults
-import UiFramework exposing (WithContext, fromElement, toElement, uiColumn, uiContextualText)
+import UiFramework
 import UiFramework.Badge as Badge
 import UiFramework.Pagination as Pagination
 import UiFramework.Table as Table
@@ -56,7 +56,7 @@ type alias Context =
 
 
 type alias UiElement msg =
-    WithContext Context msg
+    UiFramework.WithContext Context msg
 
 
 type Msg
@@ -107,7 +107,7 @@ update sharedState msg model =
 
 tt : UMPhrases.Phrase -> UiElement Msg
 tt phrase =
-    uiContextualText
+    UiFramework.uiContextualText
         (\context -> context.translate phrase)
 
 
@@ -128,7 +128,7 @@ view sharedState model =
                     , parentRole = Nothing
                     }
             in
-            toElement context (content model)
+            UiFramework.toElement context (content model)
 
         Failed e ->
             text e
@@ -137,7 +137,7 @@ view sharedState model =
 
 content : Model -> UiElement Msg
 content model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , paddingXY 20 10
@@ -147,19 +147,19 @@ content model =
             tt UMPhrases.UserListTitle
         , case model.loadingState of
             Loading ->
-                fromElement (\_ -> text "Loading")
+                UiFramework.uiText "Loading"
 
             Loaded ->
                 pageableTable model
 
             Failed e ->
-                fromElement (\_ -> text e)
+                UiFramework.uiText e
         ]
 
 
 pageableTable : Model -> UiElement Msg
 pageableTable model =
-    uiColumn [ spacing 20, width fill ]
+    UiFramework.uiColumn [ spacing 20, width fill ]
         [ userTable model.users
         , userPageable model
         ]
@@ -230,8 +230,7 @@ createColumn headPhrase f =
     { head = tt headPhrase
     , viewData =
         \user ->
-            fromElement
-                (\_ -> Element.text (f user))
+            UiFramework.uiText (f user)
     }
 
 
@@ -262,6 +261,6 @@ createRoleColumn =
     { head = tt UMPhrases.Role
     , viewData =
         \user ->
-            uiColumn [ spacing 5 ]
+            UiFramework.uiColumn [ spacing 5 ]
                 (List.map (\role -> Badge.simple Info role) user.authorities)
     }

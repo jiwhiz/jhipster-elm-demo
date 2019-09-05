@@ -5,7 +5,7 @@ import Element.Font as Font
 import Error.Common exposing (UiElement, toContext, tt)
 import Error.I18n.Phrases as ErrorPhrases
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
-import UiFramework exposing (toElement, uiColumn)
+import UiFramework
 import UiFramework.Typography exposing (h1)
 
 
@@ -32,13 +32,13 @@ update msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState _ =
     ( " 404 Not Found"
-    , toElement (toContext sharedState) content
+    , UiFramework.toElement (toContext sharedState) content
     )
 
 
 content : UiElement Msg
 content =
-    uiColumn
+    UiFramework.uiColumn
         [ height fill, centerX, paddingXY 10 10, Font.center ]
         [ h1 [] <| tt ErrorPhrases.NotFoundTitle
         ]

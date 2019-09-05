@@ -14,7 +14,7 @@ import Shared.I18n exposing (Language(..))
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (flatMap, toElement, uiColumn, uiParagraph, uiText)
+import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Form.CheckboxField as CheckboxField
 import UiFramework.Form.ComposableForm as ComposableForm
@@ -112,13 +112,13 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Login"
-    , toElement (toContext sharedState) (content model)
+    , UiFramework.toElement (toContext sharedState) (content model)
     )
 
 
 content : Model -> UiElement Msg
 content model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , paddingXY 20 10
@@ -127,7 +127,7 @@ content model =
         ]
         [ h1 [ paddingXY 0 30 ] <|
             tt LoginPhrases.LoginTitle
-        , flatMap
+        , UiFramework.withContext
             (\context ->
                 case context.user of
                     Just user ->
@@ -143,17 +143,57 @@ content model =
 
 loginPanel : Model -> UiElement Msg
 loginPanel model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , spacing 20
         , Font.alignLeft
         ]
-        [ flatMap
+        [ UiFramework.withContext
             (\context ->
+                let
+                    usernameField =
+                        ComposableForm.textField
+                            { parser = Ok
+                            , value = .username
+                            , update = \value values -> { values | username = value }
+                            , error = always Nothing
+                            , attributes =
+                                TextField.defaultAttributes
+                                    |> TextField.withLabel (context.translate LoginPhrases.UsernameLabel)
+                                    |> TextField.withPlaceholder (context.translate LoginPhrases.UsernamePlaceholder)
+                            }
+
+                    passwordField =
+                        ComposableForm.textField
+                            { parser = Ok
+                            , value = .password
+                            , update = \value values -> { values | password = value }
+                            , error = always Nothing
+                            , attributes =
+                                TextField.defaultAttributes
+                                    |> TextField.withLabel (context.translate LoginPhrases.PasswordLabel)
+                                    |> TextField.withPlaceholder (context.translate LoginPhrases.PasswordPlaceholder)
+                            }
+
+                    rememberMeCheckbox =
+                        ComposableForm.checkboxField
+                            { parser = Ok
+                            , value = .rememberMe
+                            , update = \value values -> { values | rememberMe = value }
+                            , error = always Nothing
+                            , attributes =
+                                CheckboxField.defaultAttributes
+                                    |> CheckboxField.withLabel (context.translate LoginPhrases.RememberMeLabel)
+                            }
+                in
                 WebForm.simpleForm
                     FormChanged
-                    (form context.language)
+                    (ComposableForm.succeed Login
+                        |> ComposableForm.append usernameField
+                        |> ComposableForm.append passwordField
+                        |> ComposableForm.append rememberMeCheckbox
+                    )
                     |> WebForm.withSubmitLabel (context.translate LoginPhrases.SignInButtonLabel)
                     |> WebForm.withLoadingLabel (context.translate LoginPhrases.SignInLoadingLabel)
                     |> WebForm.view model
@@ -164,60 +204,13 @@ loginPanel model =
                 , label = tt LoginPhrases.ForgetPassword
                 }
         , Alert.simple Warning <|
-            uiParagraph
+            UiFramework.uiParagraph
                 [ Font.alignLeft ]
                 [ tt LoginPhrases.NoAccountYet
-                , uiText " "
+                , UiFramework.uiText " "
                 , Alert.link
                     { onPress = Just <| NavigateTo Register
                     , label = tt LoginPhrases.RegisterNewAccount
                     }
                 ]
         ]
-
-
-form : Language -> ComposableForm.Form Values Msg
-form language =
-    let
-        translate =
-            translator language
-
-        usernameField =
-            ComposableForm.textField
-                { parser = Ok
-                , value = .username
-                , update = \value values -> { values | username = value }
-                , error = always Nothing
-                , attributes =
-                    TextField.defaultAttributes
-                        |> TextField.withLabel (translate LoginPhrases.UsernameLabel)
-                        |> TextField.withPlaceholder (translate LoginPhrases.UsernamePlaceholder)
-                }
-
-        passwordField =
-            ComposableForm.textField
-                { parser = Ok
-                , value = .password
-                , update = \value values -> { values | password = value }
-                , error = always Nothing
-                , attributes =
-                    TextField.defaultAttributes
-                        |> TextField.withLabel (translate LoginPhrases.PasswordLabel)
-                        |> TextField.withPlaceholder (translate LoginPhrases.PasswordPlaceholder)
-                }
-
-        rememberMeCheckbox =
-            ComposableForm.checkboxField
-                { parser = Ok
-                , value = .rememberMe
-                , update = \value values -> { values | rememberMe = value }
-                , error = always Nothing
-                , attributes =
-                    CheckboxField.defaultAttributes
-                        |> CheckboxField.withLabel (translate LoginPhrases.RememberMeLabel)
-                }
-    in
-    ComposableForm.succeed Login
-        |> ComposableForm.append usernameField
-        |> ComposableForm.append passwordField
-        |> ComposableForm.append rememberMeCheckbox

@@ -12,7 +12,7 @@ import Routes exposing (Route(..), routeToUrlString)
 import Shared.ResponsiveUtils exposing (wrapContent)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
-import UiFramework exposing (flatMap, toElement, uiColumn)
+import UiFramework
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.WebForm as WebForm
 import UiFramework.Typography exposing (h1)
@@ -108,13 +108,13 @@ update sharedState msg model =
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState model =
     ( "Registration"
-    , toElement (toContext sharedState) (content model)
+    , UiFramework.toElement (toContext sharedState) (content model)
     )
 
 
 content : Model -> UiElement Msg
 content model =
-    uiColumn
+    UiFramework.uiColumn
         [ width fill
         , height fill
         , alignLeft
@@ -123,7 +123,7 @@ content model =
         ]
         [ h1 [ paddingXY 0 30 ] <|
             tt AccountPhrases.RegisterTitle
-        , flatMap
+        , UiFramework.withContext
             (\context ->
                 let
                     fields =

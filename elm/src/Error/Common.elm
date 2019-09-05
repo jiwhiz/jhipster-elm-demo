@@ -4,7 +4,7 @@ import Error.I18n.Phrases as ErrorPhrases
 import Error.I18n.Translator exposing (translator)
 import Shared.I18n exposing (Language(..))
 import Shared.SharedState exposing (SharedState)
-import UiFramework exposing (UiContextual, WithContext, uiContextualText)
+import UiFramework
 
 
 type alias Context =
@@ -14,10 +14,10 @@ type alias Context =
 
 
 type alias UiElement msg =
-    WithContext Context msg
+    UiFramework.WithContext Context msg
 
 
-toContext : SharedState -> UiContextual Context
+toContext : SharedState -> UiFramework.UiContextual Context
 toContext sharedState =
     { language = sharedState.language
     , translate = translator sharedState.language
@@ -29,5 +29,5 @@ toContext sharedState =
 
 tt : ErrorPhrases.Phrase -> UiElement msg
 tt phrase =
-    uiContextualText
+    UiFramework.uiContextualText
         (\context -> context.translate phrase)

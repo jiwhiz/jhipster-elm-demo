@@ -10,7 +10,7 @@ import Html.Attributes
 import Routes exposing (Route(..), routeToUrlString)
 import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
-import UiFramework exposing (UiContextual, WithContext, flatMap, fromElement, toElement, uiColumn, uiContextualText, uiLink, uiParagraph, uiRow)
+import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1, textLead)
@@ -27,7 +27,7 @@ type alias Context =
 
 
 type alias UiElement msg =
-    WithContext Context msg
+    UiFramework.WithContext Context msg
 
 
 type Msg
@@ -46,7 +46,7 @@ update sharedState msg model =
             ( model, pushUrl sharedState.navKey (routeToUrlString route), NoUpdate )
 
 
-toContext : SharedState -> UiContextual Context
+toContext : SharedState -> UiFramework.UiContextual Context
 toContext sharedState =
     { translate = translator sharedState.language
     , user = sharedState.user
@@ -58,20 +58,20 @@ toContext sharedState =
 
 tt : HomePhrases.Phrase -> UiElement Msg
 tt phrase =
-    uiContextualText
+    UiFramework.uiContextualText
         (\context -> context.translate phrase)
 
 
 view : SharedState -> Model -> ( String, Element Msg )
 view sharedState _ =
     ( "Welcome"
-    , toElement (toContext sharedState) content
+    , UiFramework.toElement (toContext sharedState) content
     )
 
 
 content : UiElement Msg
 content =
-    flatMap
+    UiFramework.withContext
         (\context ->
             let
                 homeInfo =
@@ -84,9 +84,9 @@ content =
 
                         Nothing ->
                             Alert.simple Warning <|
-                                uiColumn
+                                UiFramework.uiColumn
                                     [ spacing 20 ]
-                                    [ uiParagraph
+                                    [ UiFramework.uiParagraph
                                         [ Font.alignLeft
                                         ]
                                         [ tt HomePhrases.SignInPrefix
@@ -99,10 +99,10 @@ content =
                                     , tt HomePhrases.AdminAccountInfo
                                     , tt HomePhrases.UserAccountInfo
                                     ]
-                    , uiParagraph
+                    , UiFramework.uiParagraph
                         [ Font.alignLeft ]
                         [ tt HomePhrases.Like
-                        , uiLink
+                        , UiFramework.uiLink
                             { url = "https://github.com/jiwhiz/jhipster-elm-demo"
                             , label = " Github!"
                             }
@@ -110,7 +110,7 @@ content =
                     ]
 
                 hipsterImg =
-                    fromElement
+                    UiFramework.fromElement
                         (\_ ->
                             el
                                 [ width fill
@@ -122,7 +122,7 @@ content =
                         )
             in
             if context.device.class == Phone then
-                uiColumn
+                UiFramework.uiColumn
                     [ width fill
                     , height fill
                     , paddingXY 5 10
@@ -131,16 +131,16 @@ content =
                     (homeInfo ++ [ hipsterImg ])
 
             else
-                uiRow
+                UiFramework.uiRow
                     [ width fill, height fill ]
-                    [ uiColumn
+                    [ UiFramework.uiColumn
                         [ width <| fillPortion 3
                         , height fill
                         , paddingXY 20 30
                         , spacing 20
                         ]
                         homeInfo
-                    , uiColumn
+                    , UiFramework.uiColumn
                         [ width <| fillPortion 1
                         , alignTop
                         ]
