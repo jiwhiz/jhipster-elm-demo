@@ -20,7 +20,6 @@ import UiFramework.Form.CheckboxField as CheckboxField
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.TextField as TextField
 import UiFramework.Form.WebForm as WebForm
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
 
@@ -131,7 +130,7 @@ content model =
             (\context ->
                 case context.user of
                     Just user ->
-                        Alert.simple Warning <|
+                        Alert.simpleWarning <|
                             (tt <| LoginPhrases.LoggedInAs user.username)
 
                     Nothing ->
@@ -198,12 +197,12 @@ loginPanel model =
                     |> WebForm.withLoadingLabel (context.translate LoginPhrases.SignInLoadingLabel)
                     |> WebForm.view model
             )
-        , Alert.simple Warning <|
+        , Alert.simpleWarning <|
             Alert.link
                 { onPress = Just <| NavigateTo PasswordResetRequest
                 , label = tt LoginPhrases.ForgetPassword
                 }
-        , Alert.simple Warning <|
+        , Alert.simpleWarning <|
             UiFramework.uiParagraph
                 [ Font.alignLeft ]
                 [ tt LoginPhrases.NoAccountYet

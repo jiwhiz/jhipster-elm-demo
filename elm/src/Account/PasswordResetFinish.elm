@@ -16,7 +16,6 @@ import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.WebForm as WebForm
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 import Utils
 
@@ -152,7 +151,7 @@ content model =
             tt AccountPhrases.ResetPasswordTitle
         , case model.key of
             Nothing ->
-                Alert.simple Danger <|
+                Alert.simpleDanger <|
                     tt AccountPhrases.MissingResetKey
 
             Just _ ->

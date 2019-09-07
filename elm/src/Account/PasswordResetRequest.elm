@@ -17,7 +17,6 @@ import UiFramework
 import UiFramework.Alert as Alert
 import UiFramework.Form.ComposableForm as ComposableForm
 import UiFramework.Form.WebForm as WebForm
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 
 
@@ -119,7 +118,7 @@ content model =
             [ paddingXY 0 30 ]
           <|
             tt AccountPhrases.ResetPasswordTitle
-        , Alert.simple Warning <|
+        , Alert.simpleWarning <|
             tt AccountPhrases.ResetPasswordInfo
         , UiFramework.withContext
             (\context ->

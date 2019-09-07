@@ -14,7 +14,6 @@ import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Toasty.Defaults
 import UiFramework
 import UiFramework.Alert as Alert
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1)
 
 
@@ -112,15 +111,15 @@ content model =
             tt AccountPhrases.ActivateTitle
         , case model.activateState of
             NoKey ->
-                Alert.simple Warning <|
+                Alert.simpleWarning <|
                     tt AccountPhrases.MissingActivationKey
 
             Activating ->
-                Alert.simple Primary <|
+                Alert.simplePrimary <|
                     tt AccountPhrases.Activating
 
             Succeeded ->
-                Alert.simple Success <|
+                Alert.simpleSuccess <|
                     UiFramework.uiParagraph []
                         [ tt AccountPhrases.UserAccountActivated
                         , Alert.link
@@ -130,7 +129,7 @@ content model =
                         ]
 
             Failed err ->
-                Alert.simple Danger <|
+                Alert.simpleDanger <|
                     UiFramework.uiParagraph []
                         [ UiFramework.uiText err
                         , Alert.link

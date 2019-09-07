@@ -12,7 +12,6 @@ import Shared.Api.User exposing (User)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import UiFramework
 import UiFramework.Alert as Alert
-import UiFramework.Types exposing (Role(..))
 import UiFramework.Typography exposing (h1, textLead)
 
 
@@ -79,11 +78,11 @@ content =
                     , textLead [] <| tt HomePhrases.Subtitle
                     , case context.user of
                         Just user ->
-                            Alert.simple Success <|
+                            Alert.simpleSuccess <|
                                 (tt <| HomePhrases.LoggedInAs user.username)
 
                         Nothing ->
-                            Alert.simple Warning <|
+                            Alert.simpleWarning <|
                                 UiFramework.uiColumn
                                     [ spacing 20 ]
                                     [ UiFramework.uiParagraph
