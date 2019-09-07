@@ -52,6 +52,6 @@ content =
             |> Alert.withRole Success
             |> Alert.withLarge
             |> Alert.withChild (tt LoginPhrases.LogoutTitle)
-            |> Alert.view
+            |> Alert.view True
         ]
         |> wrapContent
