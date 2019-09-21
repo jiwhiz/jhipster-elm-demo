@@ -37,8 +37,6 @@ import Element
 import Element.Background as Background
 import Element.Font as Font
 import Error.NotFound as NotFound
-import FontAwesome.Brands
-import FontAwesome.Solid
 import FontAwesome.Styles
 import Home.Home as Home
 import Html
@@ -54,6 +52,7 @@ import Shared.Constants exposing (jwtAuthenticationTokenKey)
 import Shared.I18n as I18n
 import Shared.I18n.Phrases as GlobalPhrases
 import Shared.I18n.Translator exposing (translator)
+import Shared.Icons exposing (..)
 import Shared.SharedState exposing (SharedState, SharedStateUpdate(..))
 import Shared.Toasty
 import Task
@@ -543,7 +542,7 @@ header sharedState navbarState =
 
         homeMenuItem =
             Navbar.linkItem (NavigateTo Home)
-                |> Navbar.withMenuIcon FontAwesome.Solid.home
+                |> Navbar.withMenuIcon homeIcon
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuHome)
 
         languageMenuItem =
@@ -557,7 +556,7 @@ header sharedState navbarState =
                         |> Dropdown.withMenuTitle (I18n.languageName I18n.ChineseSimplified)
                     ]
                 |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Solid.flag
+                |> Navbar.withMenuIcon flagIcon
                 |> Navbar.withMenuTitle (I18n.languageName sharedState.language)
 
         themeMenuItem =
@@ -571,18 +570,18 @@ header sharedState navbarState =
                         |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuThemeMateria)
                     ]
                 |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Brands.bootstrap
+                |> Navbar.withMenuIcon bootstrapIcon
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuTheme)
 
         adminMenuItem =
             Dropdown.default ToggleAdminDropdown AdminOpen
                 |> Dropdown.withMenuItems
                     [ Dropdown.menuLinkItem (NavigateTo UserList)
-                        |> Dropdown.withMenuIcon FontAwesome.Solid.user
+                        |> Dropdown.withMenuIcon userIcon
                         |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAdminUserMgt)
                     ]
                 |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Solid.userPlus
+                |> Navbar.withMenuIcon adminIcon
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuAdmin)
 
         accountMenuItem =
@@ -591,27 +590,27 @@ header sharedState navbarState =
                     (case sharedState.user of
                         Just _ ->
                             [ Dropdown.menuLinkItem (NavigateTo Settings)
-                                |> Dropdown.withMenuIcon FontAwesome.Solid.wrench
+                                |> Dropdown.withMenuIcon settingsIcon
                                 |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountSettings)
                             , Dropdown.menuLinkItem (NavigateTo PasswordUpdate)
-                                |> Dropdown.withMenuIcon FontAwesome.Solid.key
+                                |> Dropdown.withMenuIcon passwordIcon
                                 |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountPassword)
                             , Dropdown.menuLinkItem (NavigateTo Logout)
-                                |> Dropdown.withMenuIcon FontAwesome.Solid.signOutAlt
+                                |> Dropdown.withMenuIcon logoutIcon
                                 |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountLogout)
                             ]
 
                         Nothing ->
                             [ Dropdown.menuLinkItem (NavigateTo Login)
-                                |> Dropdown.withMenuIcon FontAwesome.Solid.signInAlt
+                                |> Dropdown.withMenuIcon loginIcon
                                 |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountLogin)
                             , Dropdown.menuLinkItem (NavigateTo Register)
-                                |> Dropdown.withMenuIcon FontAwesome.Solid.cashRegister
+                                |> Dropdown.withMenuIcon registerIcon
                                 |> Dropdown.withMenuTitle (translate GlobalPhrases.MenuAccountRegister)
                             ]
                     )
                 |> Navbar.DropdownItem
-                |> Navbar.withMenuIcon FontAwesome.Solid.user
+                |> Navbar.withMenuIcon userIcon
                 |> Navbar.withMenuTitle (translate GlobalPhrases.MenuAccount)
     in
     Navbar.default ToggleMenu
